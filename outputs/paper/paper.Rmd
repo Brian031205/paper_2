@@ -1,0 +1,501 @@
+---
+title: "Declining Birth rates in the US: An Analysis of Potential Factors"
+subtitle: "Reproduction of 'The Puzzle of Falling US Birth Rates since the Great Recession' (Kearney, Levine & Pardue, 2022)"
+author: Kimlin Chin
+thanks: "Code and data are available at: https://github.com/KCtt457/us-birth-rates-decline. A replication of various aspects in this paper are available at: https://doi.org/10.48152/ssrp-srs6-t802"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+abstract: "Over the past 10 years, US birth rates have been dropping steadily to an all time low of 55.8 per 1,000 women in 2020. Kearney, Levine and Pardue (2022) analyzed this phenomenon by exploring demographic, economic, social and policy factors to little enlightenment of the cause of the decline. However, they did discover a correlation between the decline and the birth cohorts of mothers, and offer the conjecture of shifting priorities as the reasoning. We replicate the results of this study with respect to the demographic and cohort effects, and discuss alternative interpretations of the data considering the impact of the feminist movement and the evolution of technology and media. The results were consistent with the initial study."
+output:
+  bookdown::pdf_document2
+toc: FALSE
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
+
+# Load libraries
+library(tidyverse)
+library(haven)
+library(kableExtra)
+library(ggprism)
+library(ggthemes)
+library(patchwork)
+
+# Read in data
+birth_data <- read_csv(here::here("inputs/data/figs_1_2_3.csv"))
+birth_cohort_data <- read_dta(here::here("inputs/data/nchs_cohort_analysis.dta"))
+pop_cohort_data <- read_dta(here::here("inputs/data/agecomp-seer.dta"))
+```
+
+# Introduction
+
+<!-- Background / Broader Context -->
+Birth rate is the number of live births per thousand in the population by year [@dict]. Birth rate is important since it is an indicator of population growth and determines the age structure of populations, which has various implications for the economy and society [@CLELAND2008364]. When the birth rate is too high or low, it affects all subgroups of the population in different ways, for example, a large number of new births will be a burden on the adult population to support them, and when this group ages to be elderly they will be a burden on governments to support them [@CLELAND2008364].
+
+There are many possible factors that can affect birth rate. Recessions have been proposed to result in a drop in birth rates, specifically the Great Recession of 2007 [@pew; @focus; @econ]. @becker proposes an economic framework for fertility, where the "demand for children" is driven by the satisfaction that children brings to people weighted against factors such as preferences (e.g. religion, race, age), income, time, expenditure and means to support each child and other considerations (e.g. contraception, marriage). @og base their analysis of the declining US birth rates on these factors.
+
+These analyses however, did not provide sufficient evidence to explain the decline in birth rates, with the authors stating "For any factor to have explained much of that decline, it would have had to change dramatically around the same time." [@og]. @og then went on to find a correlation between the recent birth cohorts of mothers and the substantial decline. In our reproduction of their paper, we build on their 'shifting priorities' explanation of the cohort effects by considering the other notable events that potentially may have influenced the nature of parenting of these cohorts, namely the Third wave of Feminism and the second half of the Digital Revolution.
+
+We replicate the paper by @og with a focus on the following research questions:
+
+* What is the trend in US birth rates over the period 1980-2020?
+* How does the trend in birth rates vary with demographic factors such as age, race, education and marital status?
+* How do the birth rates vary for different cohorts of mothers by their birth year?
+
+While the original paper used Stata [@citeStata] for data processing and analysis in its replication package, we use R [@citeR] for all data wrangling and analysis and R packages tidyverse [@tidy], ggthemes [@ggthemes], ggprism [@ggprism] and patchwork [@patchwork] to produce the figures, kableExtra [@kableExtra] to produce the tables and haven [@haven] to read the dta files.
+
+# Data
+
+## Data Source and Methodology
+
+The data on birth rates per 1,000 women ages 15-44 across all races and demographic population subgroups are obtained from the National Vital Statistics Reports for the years 2015, 2019 and 2020 [@2015birth; @2019birth; @2020birth], which they collected from birth certificates registered in all  US states and the District of Colombia. Aggregated data on the number of births for 6 different 5-year cohorts of mothers by their age and birth year is provided by @og, calculated using public birth microdata across the period 1980-1989 from the NBER Natality Database and NCHS microdata from the period 1990-2019 [@nchsR; @nber]. The birth cohorts span the years 1968-1997. The NCHS microdata is restricted use and requires an application to be obtained. We simply used the data that was supplied in the replication packageby @og.
+
+Single-age population counts, among all races from 1969-2019 and by race and Hispanic origin from 1990-2019, is obtained from the CDC SEER database [@nci].
+
+## Attributes
+
+The birth data consists of variables for the year, and birth rates for each population subgroup. For example, for race there are 3 variables: birth rate for whites, birth rate for blacks and birth rate for hispanics. There is birth rate data for 4 population subgroups - age (5-year groupings), race and ethnicity, marital status and mother's level of education. We show a glimpse of the data with variables for race and marital status in table \@ref(tab:birthdata).
+
+```{r birthdata, echo=FALSE}
+# Makes table of Ten rows of the birth rate data for years 1980-2020
+birth_data %>%
+  select(year, brate_all, brate_whitenh, brate_blacknh, brate_hisp, brate_unmarried, brate_married) %>%
+  filter(year > 1989) %>%
+  slice(1:10) %>%
+  kable(
+    caption = "Ten rows of the birth rate data for years 1980-2020",
+    col.names = c("Year", "All races", "White, non-Hispanic", "Black, non-Hispanic", "Hispanic", "Unmarried", "Married"),
+    digits = 1,
+    booktabs = TRUE, 
+    linesep = ""
+  )
+```
+
+
+For the aggregated cohort birth data, the variables are mother's age, birth cohort, number of births and cumulative births. The population data provided by @og gives the population count for women by age, year and state. We group the population count by cohort and mother's age and join this to the cohort birth data, with the first 10 rows of this data shown in table \@ref(tab:birthcohort). We also added a column with the birth years for each cohort for easier interpretation.
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# Process population data to aggregate by cohort
+fig5_pop_data1 <- pop_cohort_data %>%
+  select(1:32) %>%
+  select(-c(stname)) %>%
+  group_by(year) %>%
+  summarise(across(everything(),sum)) # https://stackoverflow.com/questions/1660124/how-to-sum-a-variable-by-group
+
+fig5_pop_data1 <- fig5_pop_data1 %>%
+  pivot_longer(-c(year), names_to = "mage", values_to = "pop")
+
+fig5_pop_data1 <- fig5_pop_data1 %>%
+  mutate(mage = as.numeric(str_replace(mage, "fem", ""))) %>%
+  mutate(cohort = year - mage) %>%
+  mutate(cohort2 = case_when(cohort >= 1968 & cohort <=1972 ~ 1,
+                             cohort >= 1973 & cohort <=1977 ~ 2,
+                             cohort >= 1978 & cohort <=1982 ~ 3,
+                             cohort >= 1983 & cohort <=1987 ~ 4,
+                             cohort >= 1988 & cohort <=1992 ~ 5,
+                             cohort >= 1993 & cohort <=1997 ~ 6))
+
+fig5_pop_data1 <- na.omit(fig5_pop_data1)
+fig5_pop_data1 <- fig5_pop_data1 %>%
+  group_by(cohort2, mage) %>%
+  summarise(pop = sum(pop))
+
+# Join dataframes for population and birth data
+birth_cohort_data <- full_join(birth_cohort_data, fig5_pop_data1, by=c("mage", "cohort2")) %>%
+  mutate(cohort_years = case_when(cohort2 == 1 ~ "1968-1972",
+                                  cohort2 == 2 ~ "1973-1977",
+                                  cohort2 == 3 ~ "1978-1982",
+                                  cohort2 == 4 ~ "1983-1987",
+                                  cohort2 == 5 ~ "1988-1992",
+                                  cohort2 == 6 ~ "1993-1997"))
+
+```
+
+
+```{r birthcohort, echo=FALSE}
+# Make table of First ten rows of the birth cohort data for 6 birth cohorts
+birth_cohort_data %>%
+  select(2,6,1,3,4,5) %>%
+  slice(1:10) %>%
+  kable(
+    caption = "First ten rows of the birth cohort data for 6 birth cohorts",
+    col.names = c("Cohort #", "Birth Years", "Mother's age", "Number of births", "Cumulative births", "Population Count"),
+    digits = 1,
+    booktabs = TRUE, 
+    linesep = ""
+  )
+```
+
+
+
+# Results
+
+## Overall Trend in US Birth Rates
+
+Figure \@ref(fig:fig1) is a replication of Figure 1 in the original paper, and it shows the trend in US birth rates for women ages 15-44. Between 1980 and 2007, the birth rates generally remained between 65-70 births per 1,000 women ages 15-44, with a minimum rate of 63.6 in 1997 and a maximum rate of 70.9 in 1990. The grey dashed lines mark the years of past recessions [@recessions], where we generally see a pattern of decline followed by an uptick in birth rates. After the Great Recession of 2007 however, there was a steady decline, diving below its past minimum rate from 1997 with a birth rate of 63.2 in 2011, and no resurgence so far. The lowest birth rate on the graph occurs in 2020 with 55.8 births per 1,000 women, which is a steep drop of 2.5 from the previous year.
+
+```{r fig1, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Trend in US Birth Rates"}
+# Figure 1 replication
+birth_data %>%
+  ggplot(aes(x = year,
+             y = brate_all)) +
+  geom_line(color = "#08519C") +
+  geom_vline(xintercept = 1980,
+             linetype = "dashed",
+             color = "grey") +
+  geom_vline(xintercept = 1981,
+             linetype = "dashed",
+             color = "grey") +
+   geom_vline(xintercept = 1990,
+             linetype = "dashed",
+             color = "grey") +
+   geom_vline(xintercept = 2001,
+             linetype = "dashed",
+             color = "grey") +
+   geom_vline(xintercept = 2007,
+             linetype = "dashed",
+             color = "darkorange") +
+  scale_x_continuous(
+    guide = "prism_minor",
+    limits = c(1980, 2020),
+    breaks = seq(1980, 2020, by = 5),
+    minor_breaks = seq(1980, 2020, by = 1)
+  ) +
+  scale_y_continuous(limits = c(50, 80), breaks = seq(50, 80, by = 5)) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.ticks.length.x = unit(7, "pt"),
+    prism.ticks.length.x = unit(4, "pt")
+  ) +
+  geom_text(
+    aes(x = 2009, y = 70),
+    nudge_x = 2,
+    nudge_y = 1,
+    label = "Great Recession"
+  ) +
+   geom_text(
+    aes(x = 2007, y = 68),
+    nudge_x = 1.5,
+    nudge_y = 1,
+    label = "2007"
+  ) +
+  labs(
+    x = "",
+    y = "Births per 1,000 women age 15-44",
+    caption = "Source: Birth Rates collected from CDC Vital Statistics Births Reports for 2015, 2019 and 2020."
+  )
+```
+
+## Demographic Factors
+
+Figure \@ref(fig:demgraphs) is a replication of plots A, B, D and E of Figure 2 in the original paper, and shows the trend in birth rates by population subgroups.
+
+```{r demprocessing, echo=FALSE, warning=FALSE, message=FALSE}
+
+# Read in the raw data. 
+fig_2_data <- read_csv(here::here("inputs/data/figs_2a_2b.csv"))
+
+# Data wrangling
+fig_2a_data <- fig_2_data %>%
+  select(-c(brate_whitenh, brate_blacknh, brate_hisp)) %>%
+  pivot_longer(-c(year), names_to = "age_group", values_to = "brate")
+
+fig_2b_data <- fig_2_data %>%
+  select(-c(brate_1519, brate_2024, brate_2529, brate_3034, brate_3539, brate_4044)) %>%
+  pivot_longer(-c(year), names_to = "race_eth", values_to = "brate") %>%
+  filter(year > 1989)
+
+fig_2e_data <- birth_data %>%
+  select(year, brate_unmarried, brate_married) %>%
+  pivot_longer(-c(year), names_to = "marriage_status", values_to = "brate")
+
+fig_2d_data <- birth_data %>%
+  select(year, brate_hsdropout, brate_hsgrad, brate_somecol, brate_colgrad) %>%
+  pivot_longer(-c(year), names_to = "education", values_to = "brate") %>%
+  filter(year > 1989)
+
+```
+
+
+```{r demgraphs, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Trends in Birth Rates by Population Subgroup"}
+# Make Figure 2a (replication of Figure 2a)
+fig2a <- fig_2a_data %>%
+  ggplot(aes(x = year,
+             y = brate,
+             color = age_group)) +
+  geom_line() +
+  geom_vline(xintercept = 2007,
+             linetype = "dashed",
+             color = "darkgrey") +
+  scale_x_continuous(
+    guide = "prism_minor",
+    limits = c(1980, 2020),
+    breaks = seq(1980, 2020, by = 5),
+    minor_breaks = seq(1980, 2020, by = 1)
+  ) +
+  scale_y_continuous(limits = c(0, 140), breaks = seq(0, 140, by = 20)) +
+  scale_color_tableau(palette = "Color Blind") +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.ticks.length.x = unit(7, "pt"),
+    prism.ticks.length.x = unit(4, "pt"),
+    legend.position = "none"
+  ) +
+  geom_text(
+    aes(x = 2007, y = 120),
+    nudge_x = 2,
+    nudge_y = 7,
+    label = "2007",
+    color = "#000000"
+  ) +
+  geom_text(aes(x = 1985, y = 125), label = "Age 25-29", color = "#000000") +
+  geom_text(aes(x = 1985, y = 100), label = "Age 20-24", color = "#000000") +
+  geom_text(aes(x = 1985, y = 80), label = "Age 30-34", color = "#000000") +
+  geom_text(aes(x = 1985, y = 60), label = "Age 15-19", color = "#000000") +
+  geom_text(aes(x = 1985, y = 30), label = "Age 35-39", color = "#000000") +
+  geom_text(aes(x = 1985, y = 10), label = "Age 40-44", color = "#000000") +
+  labs(
+    subtitle = "A: Five-year age group",
+    x = "",
+    y = "Births per 1,000 women in\n relevant population subgroup"
+  )
+
+# Make Figure 2b (replication of Figure 2b)
+fig2b <- fig_2b_data %>%
+  ggplot(aes(x = year,
+             y = brate,
+             color = race_eth)) +
+  geom_line() +
+  geom_vline(xintercept = 2007,
+             linetype = "dashed",
+             color = "darkgrey") +
+  scale_x_continuous(
+    guide = "prism_minor",
+    limits = c(1990, 2020),
+    breaks = seq(1990, 2020, by = 5),
+    minor_breaks = seq(1990, 2020, by = 1)
+  ) +
+  scale_y_continuous(limits = c(0, 140), breaks = seq(0, 140, by = 20)) +
+  scale_color_tableau(palette = "Color Blind") +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.ticks.length.x = unit(7, "pt"),
+    prism.ticks.length.x = unit(4, "pt"),
+    legend.position = "none"
+  ) +
+  geom_text(
+    aes(x = 2007, y = 120),
+    nudge_x = 2,
+    nudge_y = 7,
+    label = "2007",
+    color = "#000000"
+  ) +
+  geom_text(aes(x = 1995, y = 110), label = "Hispanic", color = "#000000") +
+  geom_text(aes(x = 1998, y = 85), label = "Black, non-Hispanic", color = "#000000") +
+  geom_text(aes(x = 1998, y = 50), label = "White, non-Hispanic", color = "#000000") +
+  labs(
+    subtitle = "B: Race and Ethnicity (ages 15-44)",
+    x = "",
+    y = ""
+  )
+
+# Make Figure 2c (replication of Figure 2e)
+fig2e <- fig_2e_data %>%
+  ggplot(aes(x = year,
+             y = brate,
+             color = marriage_status)) +
+  geom_line() +
+  geom_vline(xintercept = 2007,
+             linetype = "dashed",
+             color = "darkgrey") +
+  scale_x_continuous(
+    guide = "prism_minor",
+    limits = c(1980, 2020),
+    breaks = seq(1980, 2020, by = 5),
+    minor_breaks = seq(1980, 2020, by = 1)
+  ) +
+  scale_y_continuous(limits = c(0, 140), breaks = seq(0, 140, by = 20)) +
+  scale_color_tableau(palette = "Color Blind") +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.ticks.length.x = unit(7, "pt"),
+    prism.ticks.length.x = unit(4, "pt"),
+    legend.position = "none"
+  ) +
+  geom_text(
+    aes(x = 2007, y = 120),
+    nudge_x = 2,
+    nudge_y = 7,
+    label = "2007",
+    color = "#000000"
+  ) +
+  geom_text(aes(x = 1998, y = 100), label = "Married", color = "#000000") +
+  geom_text(aes(x = 1998, y = 50), label = "Unmarried", color = "#000000") +
+  labs(
+    subtitle = "C: Marital Status (ages 15-44)",
+    x = "",
+    y = "Births per 1,000 women in\n relevant population subgroup"
+  )
+
+
+# Make Figure 2d (replication of Figure 2d)
+fig2d <- fig_2d_data %>%
+  ggplot(aes(x = year,
+             y = brate,
+             color = education)) +
+  geom_line() +
+  geom_vline(xintercept = 2007,
+             linetype = "dashed",
+             color = "darkgrey") +
+  scale_x_continuous(
+    guide = "prism_minor",
+    limits = c(1990, 2020),
+    breaks = seq(1990, 2020, by = 5),
+    minor_breaks = seq(1990, 2020, by = 1)
+  ) +
+  scale_y_continuous(limits = c(0, 140), breaks = seq(0, 140, by = 20)) +
+  scale_color_tableau(palette = "Color Blind") +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.ticks.length.x = unit(7, "pt"),
+    prism.ticks.length.x = unit(4, "pt"),
+    legend.position = "none"
+  ) +
+  geom_text(
+    aes(x = 2007, y = 120),
+    nudge_x = 2,
+    nudge_y = 7,
+    label = "2007",
+    color = "#000000"
+  ) +
+  geom_text(aes(x = 1998, y = 120), label = "No highschool\ndegree", color = "#000000") +
+  geom_text(aes(x = 1998, y = 85), label = "College graduate", color = "#000000") +
+  geom_text(aes(x = 1998, y = 60), label = "High school graduate", color = "#000000") +
+  geom_text(aes(x = 1998, y = 40), label = "Some college", color = "#000000") +
+  labs(
+    subtitle = "D: Mother's level of education (ages 20-44)",
+    x = "",
+    y = "",
+    caption = "Source: Birth rates by age group, race and ethnicity, and marital 
+    status are gathered from CDC Vital Statistics Births Reports."
+  )
+
+# Layout plots 2x2
+(fig2a + fig2b) / (fig2e + fig2d)
+```
+
+Plot A shows the trend in birth rates over the period 1980-2020 by five-year age groups. As one would expect, the oldest age group 40-44 has the lowest birth rate. Of note is that the birth rates for older age groups 30-34, 35-39 and 40-44 have been increasing over the period, whereas the younger age groups 15-19, 20-24, 25-29 have been decreasing. The inflection point of increase/decrease is especially noticeable at the year 2007.
+
+Plot B shows the trend in birth rates over the period 1980-2020 for different races and ethnicities. Non-Hispanic black and white groups show a fairly constant trend in birth rates over the period, whereas the Hispanic group shows a significant drop after the Great Recession.
+
+Plot C shows the trend in birth rates over the period 1980-2020 for married vs unmarried mothers. Besides the small increase for unmarried women between 1980 and 1990, the trends do not demonstrate significant change in birth rates. The birth rate is higher for married mothers than unmarried mothers.
+
+Plot D shows the trend in birth rates over the period 1980-2020 for different levels of the mothers' education. The birth rates for highschool graduates, college graduates and mothers with some college education remains in about the same range after 2007. Mothers with no highschool degree have the highest birth rate of the 4 education groups, and the birth rate rises and falls around 2007 before stabilizing to pre-recession levels.
+
+## Cohort effects
+
+To obtain the children ever born, we first calculated the birth rate by dividing the number of births by the population count and then used these values to calculate the cumulative birth rate for each cohort. We then plot the cumulative birth rate against the mother's age, shown in Figure \@ref(fig:cohorttab) which is a replication of Figure 5 of the original paper. The cumulative birth rates for the 3 earlier cohorts are more similar to each other than the 3 later cohorts, with the most recent cohort showing the lowest number of children ever born.
+
+```{r cohorttab, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Children Ever Born by Mother’s Age and Birth Cohort"}
+# Calculate birth rates
+birth_cohort_data <- birth_cohort_data %>%
+  mutate(brate=numbirth/pop*1000,
+         age_20_24_year = case_when(cohort2 == 1 ~ 1992,
+                                    cohort2 == 2 ~ 1997,
+                                    cohort2 == 3 ~ 2002,
+                                    cohort2 == 4 ~ 2007,
+                                    cohort2 == 5 ~ 2012,
+                                    cohort2 == 6 ~ 2017)
+         )
+
+# Calculate cumulative birth rates for each cohort
+birth_cohort_data <- birth_cohort_data %>%
+  group_by(cohort2) %>%
+  mutate(cum_brate = cumsum(brate)/1000, 
+         cohort_years = case_when(cohort2 == 1 ~ "1968-1972",
+                                  cohort2 == 2 ~ "1973-1977",
+                                  cohort2 == 3 ~ "1978-1982",
+                                  cohort2 == 4 ~ "1983-1987",
+                                  cohort2 == 5 ~ "1988-1992",
+                                  cohort2 == 6 ~ "1993-1997")) 
+# Make plot (Figure 5 replication)
+birth_cohort_data %>%
+  ggplot(aes(x = mage,
+             y = cum_brate,
+             color = cohort_years)) +
+  geom_line() +
+  scale_y_continuous(limits=c(0, 2.5), breaks=seq(0, 2.5, by = .5)) +
+  scale_x_continuous(limits=c(15, 44), breaks=seq(15, 44, by = 1)) +
+  scale_color_tableau(palette = "Color Blind") +
+  theme_classic() +
+  theme(panel.grid.major.y = element_line(),
+        legend.background = element_blank(),
+        legend.box.background = element_rect(), 
+        legend.position = c(0.85,0.3)) +
+  labs(
+    x = "Mother's age",
+    y = "Children ever born",
+    color = "Birth cohorts"
+  )
+
+```
+
+
+# Discussion
+
+In Figure \@ref(fig:fig1), we saw that the birth rate enters a persistent decline after the Great Recession in 2007. However, one is left to wonder if this recession is really the event to demarcate this trend in birth rates, since it does not mirror the pattern of recessions prior as we have yet to see any increase in birth rates after the decline.
+
+## Why is the birth rate declining? - Demographic insights
+
+To investigate this idea more, we first turn to the trends among the various demographic subgroups. For the different age groups, the decreasing trend among younger age groups and increasing trend among older age groups points to the idea that women are choosing to have children later in life, an attitudinal change. Only the age 20-24 group seems to show a decrease at the 2007 mark that differs significantly from the years prior. One explanation is that it is the age when most people attend university, and more women are applying for tertiary education and pursuing education before having children. In fact, the National Center for Education Statistics (NCES) data shows a 17.6% increase in undergraduate enrollment among females from 2007 to 2011 [@nces], which coincides perfectly with the 19.1% decrease in birth rates in the 4 years after the Great Recession began in 2007.
+
+For race and ethnicity, the birth rates for Black and White women remains fairly constant and only the Hispanic women show a significant decline in the years 2007-2011 before it plateaus to follow a similar trend to the other two races. @og offer assimilation as a possible explanation with evidence to support this notion from @tavernise and @Parrado2008.
+
+For marital status, married and unmarried women have fairly unchanged birth rates around 2007, so it does not appear to be affected too much by the recession or other events around that time. @og suggests that the small decrease in birth rates for unmarried women is possibly due to the decline in teenage births (ages 15-19) that we saw in Figure \@ref(fig:demgraphs) plot A, since women are marrying later and therefore teenage women make up a larger proportion of the unmarried women population in their childbearing years [@marriage].
+
+For education level, the groups do not appear to demonstrate any change in birth rates with the presence of the Great Recession, except for the no highschool degree group. Its rise and fall in birth rates may be related to the boom in the residential housing market leading up to the recession, where many subprime mortgages were given out, that is, loans to persons with low credit ratings, of which women with a lack of education i.e. no highschool degree would fall under [@insider]. Thus, more women in this group may have chosen to buy homes and start families, and then the recession hit and reversed this effect.
+
+Thus across these demographic groups that we have examined, we note two things: 1) the the declining trend in the total female population of childbearing age is not paralleled equally across its subgroups of age, race and ethnicity, marital status and education level, but 2) specifically we note that younger age groups, Hispanic women and women with no highschool degree showed a significant decrease in birth rates of which only the no highschool degree mamas seem to be related to the Great Recession. We did mention earlier however, that there seems to be an attitudinal change among the women close to the recession - women having children later in life, getting married later, and more women attending colleges and universities - which leads into our discussion of cohort effects.
+
+## Cohort effects - attitudes of a new generation
+
+From Figure \@ref(fig:cohorttab), it was shown that the birth cohorts in years 1968-1982 are quite similar to each other whereas the cohorts born in years 1983-1997 seemed to pull more away with lower birth rates compared to its older counterparts. In fact, these two groupings of years define two distinct generations respectively: Generation X and Generation Y, or the "Millenials" [@gendef]. @millenial conducted a study comparing various lifestyle factors such as education, income, family and housing of Millenials to its prior generations and there are some stark differences. 
+
+Notably, women are delaying motherhood as according to a Pew Research Center analysis of population data, 2016 saw 48% of Millennial women having given birth to at least one child at ages 20 to 35 compared to the previous generation where 57% of women were already mothers in 2000 for the same age range [@milmom]. The marriage status for millenials also shows similar figures with 46% of Millennial women ages 25 to 37 being married compared to 57% of Generation X-ers for the same age range, and less millenial women are married for lower levels of education [@millenial]. Additionally, the generations are becoming more racially and ethnically diverse [@postmil] with the population of Hispanics less likely to be foreign-born [@og]. These support our arguments for the change in birth rate trends for women of the different age groups, marital status and race and ethnicity that was discussed in the previous section.
+
+So it now begs the question, why are the attitudes between these two generations so different? We briefly touch on some historical events that surely would have influenced change in Generation Y. 
+
+## The Digital Revolution and Third Wave Feminism
+
+The birth years of the millenial generation were characterized by several milestones in the Digital Revolution: the first mobile phone (1984), digital camera (1988) and the World Wide Web (1989) [@stfc]. When the first set of millenials would turn about 10 years old, CERN’s web browser software was released for public use (1991) and commercial dial up internet became available (1992) [@stfc]. In their teenage years to follow, smartphones, social media and high speed internet would be developed creating a tech-savvy generation like never before.
+
+It also happens that Generation X coincides with the years of the second wave of feminism (1963 - 1980s) whereas the formative years of millenials coincide the years of the third wave of feminism [@vox]. The third wave of the feminist movement began with the Anita Hill sexual harassment case in 1991, followed by the "Year of the Woman" in 1992 where a record-breaking number of women candidates were elected to the House of Representatives and Senate (@cawp, as cited in @Dolan1998, p. 272). The third wave of feminism attempts to be distinctive from its predecessor, with some claims in popular literature of it to have a culture of 'girl power', be more open-minded, more racially diverse and inclusive than the second wave, although it is disputed whether some of these claims are exaggerated [@Snyder2008].
+
+Therefore, the influence of technology and mass media that comes with it as well as the different ideologies behind feminism and women empowerment may have shaped the different attitudes we see between the more recent birth cohorts and older cohorts, and these changes may manifest in the decline we see in the birth rates.
+
+## The decline of birth rates - not an effect of the Great Recession?
+
+Back to Figure 1, we noted that the first time the birth rate dipped below minimum from previous years was in 2011, which, upon reflection after our discussion, is almost exactly 20 years after the commercial dial up internet became available and the third wave feminist movement began. 2012 is the year when the birth cohort 1988-1992 was ages 20-24, which is the first cohort to pull away significantly in birth rates to the previous ones. So are these other historical events indirectly responsible for the persistent decline in birth rates by influencing women's attitudes, and not the Great Recession? This is left as food for thought for now, more research would be needed to investigate this question.
+
+# Conclusion
+
+We explored the trend in birth rates in the US for the period 1980-2020 among the total child-bearing population, and demographic subgroups by age, race and ethnicity, marital status and level of education. Overall there is a decline, but the trend oftentimes remains constant for different subgroups and only declines significantly for specific groups such as younger age groups, Hispanic women and women with no highschool degree after 2007. The original paper by @og uses the Great Recession as the event to mark the beginning of the birth rate decline, but although we acknowledge some effect of the recession on decreasing birth rates, we conjecture that the lasting and continuous decline is greater explained by the shifing attitudes towards when and if to have children in the new generation, and that the decline would have been evident even if the recession had not occurred. However, if women are simply choosing to have children later and not to not have children at all, we should expect a pick back up in the birth rates in the coming decade as this group ages.
+
+## Weaknesses and next steps
+
+A weakness is that we only described a subset of the demographic variables that were presented in @og's paper and so the analysis could have been more complete. I do not claim to be an expert on the technlogical revolution or feminism, and we only provided these themes as potential explanatory factors for the change in attitude that is causing the decline in birth rates. More research into how these variables correlate with the different generational groups or birth cohorts is needed to make stronger statistical claims, such as by collecting data on women's beliefs and possibly constructing regression models if appropriate.
+
+\newpage
+
+
+# References
+
+
