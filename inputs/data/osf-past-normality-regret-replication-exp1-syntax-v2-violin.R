@@ -11,9 +11,7 @@ if(!require(psych)){install.packages('psych', dependencies = TRUE)}
 if(!require(ggplot2)){install.packages('ggplot2', dependencies = TRUE)}
 if(!require(dplyr)){install.packages('dplyr', dependencies = TRUE)}
 if(!require(MBESS)){install.packages('MBESS', dependencies = TRUE)}
-if(!require(jtools)){install.packages('jtools', dependencies = TRUE)}
 
-library(jtools)
 library(MBESS)
 library(psych)
 library(ggplot2)
@@ -24,7 +22,6 @@ library(rstudioapi)
 library(jmv)
 library(Rcpp)
 
-
 # setting formatting options
 options(scipen=999.99, digits =7)
 
@@ -33,27 +30,229 @@ this.dir <- dirname(rstudioapi::getActiveDocumentContext()$path)
 setwd(this.dir)
 
 # load our dataset 
-data <- read.csv("osf-past-normality-regret-replication-exp2-data-v2.csv", header = TRUE, stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")
+data <- read.csv("/cloud/project/inputs/data/osf-past-normality-regret-replication-exp1-data.csv", header = TRUE, stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")
 str(data)
 
-# number of participants
-NROW(na.omit(data$gender))
+# To check exclusions based on pre-registration criteria uncomment the following
+# Criteria:
+# Serious lower than 5
+# English understanding lower than 5
+# data <- data[ which(4<data$serious 
+#                     & data$engunder > 4), ]
+
 
 #Show demographics
-#Gender (1-male; 2-female)
-#set value labels
-data$gender<-factor(data$gender,levels = c(1,2,3), labels=c("Male", "Female", "Rather not say"))
+#Age
 data$gender
 table(data$gender)
-
-#Age
+#Gender
 data$age
 data$age[data$age==99] <- NA
 mean(data$age, na.rm = TRUE)
 sd(data$age, na.rm = TRUE)
 
 ###################
-# Robbery-Scenario
+# EXPERIMENT 1 (Hitchhiker-Scenario)
+
+# JAMOVI requires factors, while R imports as numeric. So, need to convert from numeric to factor.
+data$Sc1_regret<- factor(data$Sc1_regret)
+data$sc1_socnorms1<- factor(data$sc1_socnorms1)
+data$sc1_socnorms2<- factor(data$sc1_socnorms2)
+data$sc1_combinednorms<- factor(data$sc1_combinednorms)
+
+# Let's label the values better, so it's easier to understand the output.
+data$Sc1_regret <- ordered(data$Sc1_regret, levels = c(1,2), labels = c("Exception Jones", "Routine Smith"))
+data$sc1_socnorms1 <- ordered(data$sc1_socnorms1, levels = c(1,2), labels = c("Exception Jones", "Routine Smith"))
+data$sc1_socnorms2 <- ordered(data$sc1_socnorms2, levels = c(1,2), labels = c("Exception Jones", "Routine Smith"))
+data$sc1_combinednorms <- ordered(data$sc1_combinednorms, levels = c(1,2), labels = c("Exception Jones", "Routine Smith"))
+
+# Let's label the variables better, so we'll remember what those mean and it's easier to understand the output when those are reported.
+label(data$Sc1_regret) <- "Who experiences higher regret (direct replication)" 
+label(data$sc1_socnorms1) <- "Descriptive norms - which is more common?" 
+label(data$sc1_socnorms2) <- "Injunctive norms - who is more criticized by society?" 
+label(data$sc1_combinednorms) <- "Who experiences higher regret, when asking participants to consider the norm" 
+
+
+# Let's run the JAMOVI imported syntax 
+
+# Descriptives for the main variables.
+# Plots appear in the R Studio Plots section
+jmv::descriptives(
+  data=data,
+  vars=c(
+    "Sc1_regret",
+    "sc1_socnorms1",
+    "sc1_socnorms2",
+    "sc1_combinednorms"),
+  freq=TRUE)
+
+
+# binomial Z
+jmv::propTest2(
+  data=data,
+  vars=c(
+    "Sc1_regret",
+    "sc1_socnorms1",
+    "sc1_socnorms2",
+    "sc1_combinednorms"),
+  ci=TRUE)
+
+jmv::propTestN(
+  data=data,
+  var="Sc1_regret",
+  expected=TRUE,
+  ratio=c(1, 1))
+
+jmv::propTestN(
+  data=data,
+  var="sc1_socnorms1",
+  expected=TRUE,
+  ratio=c(1, 1))
+
+jmv::propTestN(
+  data=data,
+  var="sc1_socnorms2",
+  expected=TRUE,
+  ratio=c(1, 1))
+
+jmv::propTestN(
+  data=data,
+  var="sc1_combinednorms",
+  expected=TRUE,
+  ratio=c(1, 1))
+
+
+
+# You really don't need JAMOVI
+# You can also do this with regular R syntax, which to me is easier.
+
+# counts
+summary(data$Sc1_regret)
+summary(data$sc1_socnorms1)
+summary(data$sc1_socnorms2)
+summary(data$sc1_combinednorms)
+plot(data$Sc1_regret)
+plot(data$sc1_socnorms1)
+plot(data$sc1_socnorms2)
+plot(data$sc1_combinednorms)
+
+# R's way of doing binomial
+# we need to count, while excluding NAs
+x1 <- sum((data$Sc1_regret[!is.na(data$Sc1_regret)])=="Exception Jones")
+n1 <- length(data$Sc1_regret[!is.na(data$Sc1_regret)])
+prop.test(x1, n1, p=0.5, correct = FALSE)
+
+x2 <- sum((data$sc1_socnorms1[!is.na(data$sc1_socnorms1)])=="Exception Jones")
+n2 <- length(data$sc1_socnorms1[!is.na(data$sc1_socnorms1)])
+prop.test(x2, n2, p=0.5, correct = FALSE)
+
+x3 <- sum((data$sc1_socnorms2[!is.na(data$sc1_socnorms2)])=="Exception Jones")
+n3 <- length(data$sc1_socnorms2[!is.na(data$sc1_socnorms2)])
+prop.test(x3, n3, p=0.5, correct = FALSE)
+
+x4 <- sum((data$sc1_combinednorms[!is.na(data$sc1_combinednorms)])=="Exception Jones")
+n4 <- length(data$sc1_combinednorms[!is.na(data$sc1_combinednorms)])
+prop.test(x4, n4, p=0.5, correct = FALSE)
+
+
+# or...
+# binom.test(x, n,  p = 0.5,
+#            alternative = c("two.sided", "less", "greater"),
+#            conf.level = 0.95)
+
+
+
+
+
+
+
+
+
+
+
+
+###################
+# EXPERIMENT 2 (Car Accident-Scenario)
+
+#Measure correction: All particpants who indicated (5- somwhat agree) on the question regarding random chance (data$Sc2_random_1 or data$Sc2_random_2) had accidently assigned the value '56' instead of '5' in Qualtrics
+data$Sc2_random_1[data$Sc2_random_1==56] <- 5
+data$Sc2_random_2[data$Sc2_random_2==56] <- 5
+
+# Conversion from numeric to factors 
+data$Sc2_regret<- factor(data$Sc2_regret)
+data$Sc2_lucky<- factor(data$Sc2_lucky)
+
+# Label values
+data$Sc2_regret <- ordered(data$Sc2_regret, levels = c(1,2), labels = c("Routine Adams", "Exception White"))
+data$Sc2_lucky <- ordered(data$Sc2_lucky, levels = c(1,2), labels = c("Adams less lucky", "White less lucky"))
+names (data$Sc2_random_1) <- c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree nor disagree", "Somewhat agree", "Agree", "Strongly agree")
+names (data$Sc2_random_2) <- c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree nor disagree", "Somewhat agree", "Agree", "Strongly agree")
+
+# Label Variables
+label(data$Sc2_regret) <- "Who feels more upset (direct replication)"
+label(data$Sc2_random_1) <- "Adam's (Routine) accident is a random coincidence"
+label(data$Sc2_random_2) <- "White's' (Exception) accident is a random coincidence"
+label(data$Sc2_lucky) <- "Who is less lucky"
+
+# Descriptives for main variables
+jmv::descriptives(
+  data=data,
+  vars=c(
+    "Sc2_regret",
+    "Sc2_random_1",
+    "Sc2_random_2",
+    "Sc2_lucky"),
+  freq=TRUE)
+
+
+
+# binomial Z
+jmv::propTest2(
+  data=data,
+  vars=c(
+    "Sc2_regret",
+    "Sc2_lucky"),
+  ci=TRUE)
+
+jmv::propTestN(
+  data=data,
+  var="Sc2_regret",
+  expected=TRUE,
+  ratio=c(1, 1))
+
+jmv::propTestN(
+  data=data,
+  var="Sc2_lucky",
+  expected=TRUE,
+  ratio=c(1, 1))
+
+#Chi2 without Jamovi for regret and luck
+
+x5 <- sum((data$Sc2_regret[!is.na(data$Sc2_regret)])=="Exception White")
+n5 <- length(data$Sc2_regret[!is.na(data$Sc2_regret)])
+prop.test(x5, n5, p=0.5, correct = FALSE)
+
+x6 <- sum((data$Sc2_lucky[!is.na(data$Sc2_lucky)])=="Exception White")
+n6 <- length(data$Sc2_lucky[!is.na(data$Sc2_lucky)])
+prop.test(x6, n6, p=0.5, correct = FALSE)
+
+#t-test for "random chance"-Variable
+
+data$Sc2_random_1
+data$Sc2_random_2
+table(data$Sc2_random_1)
+table(data$Sc2_random_2)
+summary(data$Sc2_random_1)
+summary(data$Sc2_random_2)
+sd(data$Sc2_random_1, na.rm = TRUE)
+sd(data$Sc2_random_2, na.rm = TRUE)
+t.test(data$Sc2_random_1,data$Sc2_random_2, paired=TRUE)
+hist(data$Sc2_random_1, main = "Histogram of routine randomness", xlab = "Adam's (Routine) accident is a random coincidence")
+hist(data$Sc2_random_2, main = "Histogram of exception randomness", xlab = "White's' (Exception) accident is a random coincidence")
+
+
+###################
+#EXPERIMENT 3 (Robbery-Scenario)
 
 #Preparation for ANOVA
 #Bring data it format with two rows (Compensation and Condition)
@@ -62,7 +261,6 @@ sd(data$age, na.rm = TRUE)
 data$Sc3condition <- 0
 data$compensationagg <- 0
 data$regretagg <- 0
-
 for (i in 1:nrow(data)){
   if (!is.na(data$Sc3_C1_text[i])){
     data$Sc3condition[i] <- 1
@@ -89,9 +287,7 @@ for (i in 1:nrow(data)){
 #value labels
 data$Sc3conditionl<-factor(data$Sc3condition,levels = c(1,2,3), labels=c("Routine", "Self-produced exception", "Other-produced exception"))
 
-
 # let's have a look at this
-table(data$Sc3conditionl)
 table(data$Sc3conditionl)
 
 #Adjust Copensation-Scale to original paper (Values from 0 to 10, instead of 1 to 11)
@@ -113,12 +309,6 @@ names (data$regretaggrecoded) <- c("no regret", "weak regret", "medium regret", 
 # get descriptives
 describeBy(data$compensationaggrecoded, data$Sc3conditionl, mat=TRUE)
 
-# plot it, doesn't look normally distributed
-hist(data$compensationagg)
-
-# test for normality
-shapiro.test(data$compensationagg)
-
 # run an omnibus ANOVA for compensation
 # from https://blogs.uoregon.edu/rclub/2015/11/03/anova-contrasts-in-r/ 
 model <- aov(compensationaggrecoded ~ Sc3conditionl, data = data)
@@ -135,24 +325,21 @@ t.test(
 t.test(
   data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded, 
   data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded)
-wilcox.test(
-  data[which(data$Sc3conditionl=="Routine"),]$compensationaggrecoded, 
-  data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded)
-wilcox.test(
-  data[which(data$Sc3conditionl=="Routine"),]$compensationaggrecoded, 
-  data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded)
-wilcox.test(
-  data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded, 
-  data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded)
-smd(
-  data[which(data$Sc3conditionl=="Routine"),]$compensationaggrecoded, 
-  data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded)
-smd(
-  data[which(data$Sc3conditionl=="Routine"),]$compensationaggrecoded, 
-  data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded)
-smd(
-  data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded, 
-  data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded)
+ci.smd(smd=smd(data[which(data$Sc3conditionl=="Routine"),]$compensationaggrecoded, 
+               data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded), 
+       n.1=length(data[which(data$Sc3conditionl=="Routine"),]$compensationaggrecoded), 
+       n.2=length(data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded), 
+       conf.level=0.95)
+ci.smd(smd=smd(data[which(data$Sc3conditionl=="Routine"),]$compensationaggrecoded, 
+               data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded), 
+       n.1=length(data[which(data$Sc3conditionl=="Routine"),]$compensationaggrecoded), 
+       n.2=length(data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded), 
+       conf.level=0.95)
+ci.smd(smd=smd(data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded, 
+               data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded), 
+       n.1=length(data[which(data$Sc3conditionl=="Self-produced exception"),]$compensationaggrecoded), 
+       n.2=length(data[which(data$Sc3conditionl=="Other-produced exception"),]$compensationaggrecoded), 
+       conf.level=0.95)
 
 
 # plot it out
@@ -170,9 +357,8 @@ ggplot(plot.data, aes(x=Sc3conditionl, y=mean, group = factor(1))) +
   geom_point() + 
   xlab("Condition") +
   ylab("Compensation") +
-  expand_limits(y=0) +
-  geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci), width=.1) +
-  ggtitle("Mean compensation by condition")
+  expand_limits(y=4) +
+  geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci), width=.1)
 
 threeconditionscompensation <- ggplot(data, aes(x=Sc3conditionl, y=compensationaggrecoded)) + 
   geom_violin() + geom_violin(trim=FALSE) + 
@@ -220,15 +406,24 @@ t.test(
 t.test(
   data[which(data$Sc3conditionl=="Self-produced exception"),]$regretaggrecoded, 
   data[which(data$Sc3conditionl=="Other-produced exception"),]$regretaggrecoded)
-smd(
-  data[which(data$Sc3conditionl=="Routine"),]$regretaggrecoded, 
-  data[which(data$Sc3conditionl=="Self-produced exception"),]$regretaggrecoded)
-smd(
-  data[which(data$Sc3conditionl=="Routine"),]$regretaggrecoded, 
-  data[which(data$Sc3conditionl=="Other-produced exception"),]$regretaggrecoded)
-smd(
-  data[which(data$Sc3conditionl=="Self-produced exception"),]$regretaggrecoded, 
-  data[which(data$Sc3conditionl=="Other-produced exception"),]$regretaggrecoded)
+ci.smd(smd=smd(data[which(data$Sc3conditionl=="Routine"),]$regretaggrecoded, 
+               data[which(data$Sc3conditionl=="Self-produced exception"),]$regretaggrecoded), 
+       n.1=length(data[which(data$Sc3conditionl=="Routine"),]$regretaggrecoded), 
+       n.2=length(data[which(data$Sc3conditionl=="Self-produced exception"),]$regretaggrecoded), 
+       conf.level=0.95)
+ci.smd(smd=smd(data[which(data$Sc3conditionl=="Routine"),]$regretaggrecoded, 
+               data[which(data$Sc3conditionl=="Other-produced exception"),]$regretaggrecoded), 
+       n.1=length(data[which(data$Sc3conditionl=="Routine"),]$regretaggrecoded), 
+       n.2=length(data[which(data$Sc3conditionl=="Other-produced exception"),]$regretaggrecoded), 
+       conf.level=0.95)
+ci.smd(smd=smd(data[which(data$Sc3conditionl=="Self-produced exception"),]$regretaggrecoded, 
+               data[which(data$Sc3conditionl=="Other-produced exception"),]$regretaggrecoded), 
+       n.1=length(data[which(data$Sc3conditionl=="Self-produced exception"),]$regretaggrecoded), 
+       n.2=length(data[which(data$Sc3conditionl=="Other-produced exception"),]$regretaggrecoded), 
+       conf.level=0.95)
+
+
+
 
 # plot it out
 data.plot = data[which(!is.na(data$Sc3conditionl)),]
@@ -245,16 +440,10 @@ ggplot(plot.data, aes(x=Sc3conditionl, y=mean, group = factor(1))) +
   geom_point() +
   xlab("Condition") +
   ylab("Regret") +
-  expand_limits(y=0) +
-  geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci), width=.1) +
-  ggtitle("Mean regret by condition")
+  expand_limits(y=3) +
+  geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci), width=.1)
 
-data_summary <- function(x) {
-  m <- mean(x)
-  ymin <- m-sd(x)
-  ymax <- m+sd(x)
-  return(c(y=m,ymin=ymin,ymax=ymax))
-}
+
 
 threeconditionsregret <- ggplot(data, aes(x=Sc3conditionl, y=regretaggrecoded)) + 
   geom_violin() + geom_violin(trim=FALSE) + 
@@ -278,9 +467,6 @@ threeconditionsregret
 
 
 
-########
-# COMBINING EXCEPTIONAL conditions
-########
 
 #Preparation for t-test (Original analysis)
 #Bring data it format with two rows (Compensation and Condition)
@@ -348,9 +534,14 @@ t.test(
   data[which(data$Sc3conditionl1=="Routine"),]$compensationaggrecoded1, 
   data[which(data$Sc3conditionl1=="Exception"),]$compensationaggrecoded1)
 
-smd(
-  data[which(data$Sc3conditionl1=="Routine"),]$compensationaggrecoded1, 
-  data[which(data$Sc3conditionl1=="Exception"),]$compensationaggrecoded1)
+ci.smd(smd=smd(data[which(data$Sc3conditionl1=="Exception"),]$compensationaggrecoded1,
+               data[which(data$Sc3conditionl1=="Routine"),]$compensationaggrecoded1), 
+       n.1=length(data[which(data$Sc3conditionl1=="Routine"),]$compensationaggrecoded1), 
+       n.2=length(data[which(data$Sc3conditionl1=="Exception"),]$compensationaggrecoded1), 
+       conf.level=0.95)
+
+# what was the effect in the original study?
+ci.smd(ncp=2.17, n.1=58, n.2 = 105, conf.level=0.95)
 
 exceptioncombinedcompensationplot <- ggplot(data, aes(x=Sc3conditionl1, y=compensationaggrecoded1)) + 
   geom_violin() + geom_violin(trim=FALSE) + 
@@ -392,9 +583,11 @@ t.test(
   data[which(data$Sc3conditionl1=="Routine"),]$regretaggrecoded1, 
   data[which(data$Sc3conditionl1=="Exception"),]$regretaggrecoded1)
 
-smd(
-  data[which(data$Sc3conditionl1=="Routine"),]$regretaggrecoded1, 
-  data[which(data$Sc3conditionl1=="Exception"),]$regretaggrecoded1)
+ci.smd(smd=smd(data[which(data$Sc3conditionl1=="Exception"),]$regretaggrecoded1,
+               data[which(data$Sc3conditionl1=="Routine"),]$regretaggrecoded1), 
+       n.1=length(data[which(data$Sc3conditionl1=="Routine"),]$regretaggrecoded1), 
+       n.2=length(data[which(data$Sc3conditionl1=="Exception"),]$regretaggrecoded1), 
+       conf.level=0.95)
 
 exceptioncombinedregretplot <- ggplot(data, aes(x=Sc3conditionl1, y=regretaggrecoded1)) + 
   geom_violin() + geom_violin(trim=FALSE) + 

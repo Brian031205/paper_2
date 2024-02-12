@@ -1,13 +1,13 @@
 ---
 title: "Declining Birth rates in the US: An Analysis of Potential Factors"
 subtitle: "Reproduction of 'The Puzzle of Falling US Birth Rates since the Great Recession' (Kearney, Levine & Pardue, 2022)"
-author: Kimlin Chin
-thanks: "Code and data are available at: https://github.com/KCtt457/us-birth-rates-decline. A replication of various aspects in this paper are available at: https://doi.org/10.48152/ssrp-srs6-t802"
+author: Heng Ma
+thanks: "Code and data are available at: https://github.com/Brian031205/paper_2.git. A replication of various aspects in this paper are available at: ______________    "
 date: "`r format(Sys.time(), '%d %B %Y')`"
 abstract: "Over the past 10 years, US birth rates have been dropping steadily to an all time low of 55.8 per 1,000 women in 2020. Kearney, Levine and Pardue (2022) analyzed this phenomenon by exploring demographic, economic, social and policy factors to little enlightenment of the cause of the decline. However, they did discover a correlation between the decline and the birth cohorts of mothers, and offer the conjecture of shifting priorities as the reasoning. We replicate the results of this study with respect to the demographic and cohort effects, and discuss alternative interpretations of the data considering the impact of the feminist movement and the evolution of technology and media. The results were consistent with the initial study."
 output:
   bookdown::pdf_document2
-toc: FALSE
+toc: TRUE
 bibliography: references.bib
 ---
 
@@ -16,17 +16,29 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
 
 # Load libraries
-library(tidyverse)
-library(haven)
-library(kableExtra)
-library(ggprism)
-library(ggthemes)
-library(patchwork)
+if(!require(Rcpp)){install.packages('Rcpp', dependencies = TRUE)}
+#if(!require(jmv)){install.packages('jmv', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))}
+if(!require(jmv)){install.packages('jmv', dependencies = TRUE)}
+if(!require(rstudioapi)){install.packages('rstudioapi', dependencies = TRUE)}
+if(!require(effsize)){install.packages('effsize', dependencies = TRUE)}
+if(!require(Hmisc)){install.packages('effsize', dependencies = TRUE)}
+if(!require(psych)){install.packages('psych', dependencies = TRUE)}
+if(!require(ggplot2)){install.packages('ggplot2', dependencies = TRUE)}
+if(!require(dplyr)){install.packages('dplyr', dependencies = TRUE)}
+if(!require(MBESS)){install.packages('MBESS', dependencies = TRUE)}
+
+library(MBESS)
+library(psych)
+library(ggplot2)
+library(dplyr) 
+library(Hmisc)
+library(effsize)
+library(rstudioapi)
+library(jmv)
+library(Rcpp)
 
 # Read in data
-birth_data <- read_csv(here::here("inputs/data/figs_1_2_3.csv"))
-birth_cohort_data <- read_dta(here::here("inputs/data/nchs_cohort_analysis.dta"))
-pop_cohort_data <- read_dta(here::here("inputs/data/agecomp-seer.dta"))
+
 ```
 
 # Introduction
@@ -133,320 +145,236 @@ birth_cohort_data %>%
 
 # Results
 
-## Overall Trend in US Birth Rates
+## Overall evaluation in regre depending hitchhiker scenario
 
-Figure \@ref(fig:fig1) is a replication of Figure 1 in the original paper, and it shows the trend in US birth rates for women ages 15-44. Between 1980 and 2007, the birth rates generally remained between 65-70 births per 1,000 women ages 15-44, with a minimum rate of 63.6 in 1997 and a maximum rate of 70.9 in 1990. The grey dashed lines mark the years of past recessions [@recessions], where we generally see a pattern of decline followed by an uptick in birth rates. After the Great Recession of 2007 however, there was a steady decline, diving below its past minimum rate from 1997 with a birth rate of 63.2 in 2011, and no resurgence so far. The lowest birth rate on the graph occurs in 2020 with 55.8 births per 1,000 women, which is a steep drop of 2.5 from the previous year.
+```{r table1, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Rates for Regret, Social norms and Negative affect"}
 
-```{r fig1, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Trend in US Birth Rates"}
+Orginal_table <- read.csv("/cloud/project/inputs/data/Ex1.csv", header = TRUE, stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")
+print(Orginal_table)
+```
+
+Figure \@ref(fig:fig1) is a replication of Figure 1 in the original paper, In this section, participants evaluated a classic scenario known as the hitchhiker scenario, to assess the impact of past behavior on the perception of regret following negative outcomes. 92% of the 315 participants believed that Mr. Jones, who almost never gives rides to others, felt a stronger sense of regret. The majority of participants believed that Mr. Jones, who almost never picks up hitchhikers, exhibits behavior that is more common in society (95% out of 326 respondents), whereas Mr. Smith, who frequently gives rides to hitchhikers, is more likely to be criticized by society (91% out of 310 respondents). For the assessment of negative affect, 93% of people believed that Mr. Jones experienced more negative affect compared to Mr. Smith. Overall, these two experiments provided very close replications, similar to the the original study.   
+
+
+```{r fig1, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Rates for Regret, Social norms and Negative affect"}
+data1 <- read.csv("/cloud/project/inputs/data/Ex1.csv", header = TRUE, stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")
+str(data)
+
 # Figure 1 replication
-birth_data %>%
-  ggplot(aes(x = year,
-             y = brate_all)) +
-  geom_line(color = "#08519C") +
-  geom_vline(xintercept = 1980,
-             linetype = "dashed",
-             color = "grey") +
-  geom_vline(xintercept = 1981,
-             linetype = "dashed",
-             color = "grey") +
-   geom_vline(xintercept = 1990,
-             linetype = "dashed",
-             color = "grey") +
-   geom_vline(xintercept = 2001,
-             linetype = "dashed",
-             color = "grey") +
-   geom_vline(xintercept = 2007,
-             linetype = "dashed",
-             color = "darkorange") +
-  scale_x_continuous(
-    guide = "prism_minor",
-    limits = c(1980, 2020),
-    breaks = seq(1980, 2020, by = 5),
-    minor_breaks = seq(1980, 2020, by = 1)
-  ) +
-  scale_y_continuous(limits = c(50, 80), breaks = seq(50, 80, by = 5)) +
-  theme_classic() +
-  theme(
-    panel.grid.major.y = element_line(),
-    axis.ticks.length.x = unit(7, "pt"),
-    prism.ticks.length.x = unit(4, "pt")
-  ) +
-  geom_text(
-    aes(x = 2009, y = 70),
-    nudge_x = 2,
-    nudge_y = 1,
-    label = "Great Recession"
-  ) +
-   geom_text(
-    aes(x = 2007, y = 68),
-    nudge_x = 1.5,
-    nudge_y = 1,
-    label = "2007"
-  ) +
+
+library(ggplot2)
+library(reshape2)
+library(ggplot2)
+library(readr)
+library(dplyr)
+
+
+
+
+data <- data.frame(
+  Category = c('Regret', 'Social norms (injunctive)', 'Social norms (descriptive)', 'Negative affect'),
+  Smith_Routine = c(7.9, 4.7, 90.6, 7.3),
+  Jones_Exception = c(92.1, 95.3, 9.4, 92.7)
+)
+
+long_data <- melt(data, id.vars = 'Category', variable.name = 'Group', value.name = 'Percentage')
+
+ggplot(long_data, aes(x = Category, y = Percentage, fill = Group)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  scale_fill_grey(start = 0.8, end = 0.2) + # Adjust the grey scale to match the example
+  theme_minimal() +
   labs(
-    x = "",
-    y = "Births per 1,000 women age 15-44",
-    caption = "Source: Birth Rates collected from CDC Vital Statistics Births Reports for 2015, 2019 and 2020."
+    fill = "", 
+    x = "",    
+    y = ""     
+  ) +
+  theme(
+    legend.position = "bottom", 
+    axis.text.x = element_text(angle = 45, hjust = 1), # Rotate x-axis labels if necessary
+    plot.title = element_text(hjust = 0.5) # Center the plot title if you add one
   )
+print(ggplot)
 ```
 
 ## Demographic Factors
 
-Figure \@ref(fig:demgraphs) is a replication of plots A, B, D and E of Figure 2 in the original paper, and shows the trend in birth rates by population subgroups.
+Figure \@ref(fig:fig2) is a replication of Figure 2 in the original paper, and shows the Proportions for perceived regret and luck.This graph compares the relationship between regret and luck, with 81% of 277 respondents believing that Mr. White, who had just changed to a new route home and experienced an accident, would feel more regretful.
+```{r table1, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Rates for Regret, Social norms and Negative affect"}
 
-```{r demprocessing, echo=FALSE, warning=FALSE, message=FALSE}
+table2 <- read.csv("/cloud/project/inputs/data/table2.csv", header = TRUE, stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")
+print(table2)
+```
+ As for luck, Mr. White (exception) was considered less lucky than Mr. Adams (routine), with 114 participants (33%) viewing Mr. Adams as less lucky, whereas 228 (66%) perceived Mr. White to be less lucky.
 
-# Read in the raw data. 
-fig_2_data <- read_csv(here::here("inputs/data/figs_2a_2b.csv"))
 
-# Data wrangling
-fig_2a_data <- fig_2_data %>%
-  select(-c(brate_whitenh, brate_blacknh, brate_hisp)) %>%
-  pivot_longer(-c(year), names_to = "age_group", values_to = "brate")
+```{r fig2, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Trends in Birth Rates by Population Subgroup"}
 
-fig_2b_data <- fig_2_data %>%
-  select(-c(brate_1519, brate_2024, brate_2529, brate_3034, brate_3539, brate_4044)) %>%
-  pivot_longer(-c(year), names_to = "race_eth", values_to = "brate") %>%
-  filter(year > 1989)
+library(ggplot2)
+library(reshape2)
 
-fig_2e_data <- birth_data %>%
-  select(year, brate_unmarried, brate_married) %>%
-  pivot_longer(-c(year), names_to = "marriage_status", values_to = "brate")
+df <- read.csv("/cloud/project/inputs/data/table2.csv", header = TRUE, stringsAsFactors = FALSE)
 
-fig_2d_data <- birth_data %>%
-  select(year, brate_hsdropout, brate_hsgrad, brate_somecol, brate_colgrad) %>%
-  pivot_longer(-c(year), names_to = "education", values_to = "brate") %>%
-  filter(year > 1989)
+# Clean up the data by removing unnecessary 'Counts' columns and renaming the remaining
+df_clean <- df[, -c(2, 4)]
+names(df_clean) <- c("Category", "Regret", "Luck")
 
+# Melt the data frame to have 'Category', 'Variable', and 'Value' columns
+df_melted <- melt(df_clean, id.vars = "Category", variable.name = "Outcome", value.name = "Percentage")
+
+# Plot with ggplot2
+p <- ggplot(df_melted, aes(x = Outcome, y = Percentage, fill = Category)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7)) +
+  scale_fill_manual(values=c("Routine Adams" = "black", "Exception White" = "grey")) +
+  labs(x = "", y = "Percentage", fill = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom")
+
+# Print the plot
+print(p)
 ```
 
 
-```{r demgraphs, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Trends in Birth Rates by Population Subgroup"}
-# Make Figure 2a (replication of Figure 2a)
-fig2a <- fig_2a_data %>%
-  ggplot(aes(x = year,
-             y = brate,
-             color = age_group)) +
-  geom_line() +
-  geom_vline(xintercept = 2007,
-             linetype = "dashed",
-             color = "darkgrey") +
-  scale_x_continuous(
-    guide = "prism_minor",
-    limits = c(1980, 2020),
-    breaks = seq(1980, 2020, by = 5),
-    minor_breaks = seq(1980, 2020, by = 1)
-  ) +
-  scale_y_continuous(limits = c(0, 140), breaks = seq(0, 140, by = 20)) +
-  scale_color_tableau(palette = "Color Blind") +
-  theme_classic() +
+
+
+
+
+```{r proportions, echo=FALSE, warning=FALSE, message=FALSE}
+this.dir <- dirname(rstudioapi::getActiveDocumentContext()$path)
+setwd(this.dir)
+
+# load our dataset 
+data <- read.csv("/cloud/project/inputs/data/osf-past-normality-regret-replication-exp1-data.csv", header = TRUE, stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")
+str(data)
+
+data$Sc1_regret<- factor(data$Sc1_regret)
+data$sc1_socnorms1<- factor(data$sc1_socnorms1)
+data$sc1_socnorms2<- factor(data$sc1_socnorms2)
+data$sc1_combinednorms<- factor(data$sc1_combinednorms)
+
+# Let's label the values better, so it's easier to understand the output.
+data$Sc1_regret <- ordered(data$Sc1_regret, levels = c(1,2), labels = c("Exception Jones", "Routine Smith"))
+data$sc1_socnorms1 <- ordered(data$sc1_socnorms1, levels = c(1,2), labels = c("Exception Jones", "Routine Smith"))
+data$sc1_socnorms2 <- ordered(data$sc1_socnorms2, levels = c(1,2), labels = c("Exception Jones", "Routine Smith"))
+data$sc1_combinednorms <- ordered(data$sc1_combinednorms, levels = c(1,2), labels = c("Exception Jones", "Routine Smith"))
+
+data$Sc3condition1 <- 0
+data$compensationagg1 <- 0
+data$regretagg1 <- 0
+for (i in 1:nrow(data)){
+  if (!is.na(data$Sc3_C1_text[i])){
+    data$Sc3condition1[i] <- 1
+    data$compensationagg1[i] <- data$sc3_c1_compensation[i]
+    data$regretagg1[i] <- data$sc3_c1_regret[i]
+  }
+  else if (!is.na(data$Sc3_C2_text[i])){
+    data$Sc3condition1[i] <- 2
+    data$compensationagg1[i] <- data$sc3_c2_compensation[i]
+    data$regretagg1[i] <- data$sc3_c2_regret[i]
+  }
+  else if (!is.na(data$Sc3_C3_text[i])){
+    data$Sc3condition1[i] <- 2
+    data$compensationagg1[i] <- data$sc3_c3_compensation[i]
+    data$regretagg1[i] <- data$sc3_c3_regret[i]
+  }
+  else {
+    data$Sc3condition1[i] <- NA
+    data$compensationagg1[i] <- NA
+    data$regretagg1[i] <- NA
+  }
+}
+
+#value labels
+data$Sc3conditionl1<-factor(data$Sc3condition1,levels = c(1,2), labels=c("Routine", "Exception"))
+
+# let's have a look at this
+table(data$Sc3conditionl1)
+
+#Adjust Copensation-Scale to original paper (Values from 0 to 10, instead of 1 to 11)
+data$compensationaggrecoded1 = data$compensationagg1-1
+
+#Adjust Regret Scale (Values 1 to 5, indead of 0 to 4)
+data$regretaggrecoded1 = data$regretagg1+1
+
+# Label Variables
+names (data$compensationaggrecoded1) <- c("0", "100,000", "200,000", "300,000", "400,000", "500,000", "600,000", "700,000", "800,000", "900,000", "1,000,000")
+names (data$regretaggrecoded1) <- c("no regret", "weak regret", "medium regret", "strong regret", "very strong regret")
+
+
+
+#######
+# Compensation
+########
+
+
+
+
+
+# what was the effect in the original study?
+ci.smd(ncp=2.17, n.1=58, n.2 = 105, conf.level=0.95)
+
+exceptioncombinedcompensationplot <- ggplot(data, aes(x=Sc3conditionl1, y=compensationaggrecoded1)) + 
+  geom_violin() + geom_violin(trim=FALSE) + 
+  scale_x_discrete(limits=c("Routine", "Exception")) +
+  geom_jitter(shape=16, position=position_jitter(height=0.1, width=0.2)) +
+  scale_color_grey() + scale_fill_grey() + 
+  theme_apa() +
+  theme(axis.title.x=element_blank(), 
+        axis.text = element_text(size = 16),
+        axis.title.y = element_text(size = 20),
+        panel.grid.major = element_line(colour="grey", size = (0.1)),
+        panel.grid.minor = element_line(size = (0.1), colour="grey"),
+        text=element_text(family="Arial"))+
+  xlab("Condition") +
+  ylab("Compensation") +
+  scale_y_continuous(minor_breaks = seq(-10, 15, 5)) +
+  stat_summary(fun.data = mean_se, geom = "errorbar",
+               position = position_dodge(width = 0.90), width = 0.2) +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+               size=3)
+exceptioncombinedcompensationplot
+
+
+########
+# Regret
+########
+
+
+
+
+
+exception_combined_regret_plot <- ggplot(data, aes(x = Sc3conditionl1, y = regretaggrecoded1)) +
+  geom_violin(trim = FALSE) + # Duplicate geom_violin removed
+  geom_jitter(shape = 16, position = position_jitter(height = 0.1, width = 0.2)) +
+  scale_x_discrete(limits = c("Routine", "Exception")) +
+  scale_color_grey() + 
+  scale_fill_grey() + 
+  theme_apa() +
   theme(
-    panel.grid.major.y = element_line(),
-    axis.ticks.length.x = unit(7, "pt"),
-    prism.ticks.length.x = unit(4, "pt"),
-    legend.position = "none"
+    axis.title.x = element_blank(), 
+    axis.text = element_text(size = 16),
+    axis.title.y = element_text(size = 20),
+    panel.grid.major = element_line(colour = "grey", size = 0.1),
+    panel.grid.minor = element_line(size = 0.1, colour = "grey"),
+    text = element_text(family = "Arial")
   ) +
-  geom_text(
-    aes(x = 2007, y = 120),
-    nudge_x = 2,
-    nudge_y = 7,
-    label = "2007",
-    color = "#000000"
-  ) +
-  geom_text(aes(x = 1985, y = 125), label = "Age 25-29", color = "#000000") +
-  geom_text(aes(x = 1985, y = 100), label = "Age 20-24", color = "#000000") +
-  geom_text(aes(x = 1985, y = 80), label = "Age 30-34", color = "#000000") +
-  geom_text(aes(x = 1985, y = 60), label = "Age 15-19", color = "#000000") +
-  geom_text(aes(x = 1985, y = 30), label = "Age 35-39", color = "#000000") +
-  geom_text(aes(x = 1985, y = 10), label = "Age 40-44", color = "#000000") +
-  labs(
-    subtitle = "A: Five-year age group",
-    x = "",
-    y = "Births per 1,000 women in\n relevant population subgroup"
-  )
+  xlab("Condition") +
+  ylab("Regret") +
+  stat_summary(fun.data = mean_se, geom = "errorbar",
+               position = position_dodge(width = 0.9), width = 0.2) +
+  stat_summary(fun.y = mean, geom = "point", shape = 18,
+               size = 3)
 
-# Make Figure 2b (replication of Figure 2b)
-fig2b <- fig_2b_data %>%
-  ggplot(aes(x = year,
-             y = brate,
-             color = race_eth)) +
-  geom_line() +
-  geom_vline(xintercept = 2007,
-             linetype = "dashed",
-             color = "darkgrey") +
-  scale_x_continuous(
-    guide = "prism_minor",
-    limits = c(1990, 2020),
-    breaks = seq(1990, 2020, by = 5),
-    minor_breaks = seq(1990, 2020, by = 1)
-  ) +
-  scale_y_continuous(limits = c(0, 140), breaks = seq(0, 140, by = 20)) +
-  scale_color_tableau(palette = "Color Blind") +
-  theme_classic() +
-  theme(
-    panel.grid.major.y = element_line(),
-    axis.ticks.length.x = unit(7, "pt"),
-    prism.ticks.length.x = unit(4, "pt"),
-    legend.position = "none"
-  ) +
-  geom_text(
-    aes(x = 2007, y = 120),
-    nudge_x = 2,
-    nudge_y = 7,
-    label = "2007",
-    color = "#000000"
-  ) +
-  geom_text(aes(x = 1995, y = 110), label = "Hispanic", color = "#000000") +
-  geom_text(aes(x = 1998, y = 85), label = "Black, non-Hispanic", color = "#000000") +
-  geom_text(aes(x = 1998, y = 50), label = "White, non-Hispanic", color = "#000000") +
-  labs(
-    subtitle = "B: Race and Ethnicity (ages 15-44)",
-    x = "",
-    y = ""
-  )
-
-# Make Figure 2c (replication of Figure 2e)
-fig2e <- fig_2e_data %>%
-  ggplot(aes(x = year,
-             y = brate,
-             color = marriage_status)) +
-  geom_line() +
-  geom_vline(xintercept = 2007,
-             linetype = "dashed",
-             color = "darkgrey") +
-  scale_x_continuous(
-    guide = "prism_minor",
-    limits = c(1980, 2020),
-    breaks = seq(1980, 2020, by = 5),
-    minor_breaks = seq(1980, 2020, by = 1)
-  ) +
-  scale_y_continuous(limits = c(0, 140), breaks = seq(0, 140, by = 20)) +
-  scale_color_tableau(palette = "Color Blind") +
-  theme_classic() +
-  theme(
-    panel.grid.major.y = element_line(),
-    axis.ticks.length.x = unit(7, "pt"),
-    prism.ticks.length.x = unit(4, "pt"),
-    legend.position = "none"
-  ) +
-  geom_text(
-    aes(x = 2007, y = 120),
-    nudge_x = 2,
-    nudge_y = 7,
-    label = "2007",
-    color = "#000000"
-  ) +
-  geom_text(aes(x = 1998, y = 100), label = "Married", color = "#000000") +
-  geom_text(aes(x = 1998, y = 50), label = "Unmarried", color = "#000000") +
-  labs(
-    subtitle = "C: Marital Status (ages 15-44)",
-    x = "",
-    y = "Births per 1,000 women in\n relevant population subgroup"
-  )
-
-
-# Make Figure 2d (replication of Figure 2d)
-fig2d <- fig_2d_data %>%
-  ggplot(aes(x = year,
-             y = brate,
-             color = education)) +
-  geom_line() +
-  geom_vline(xintercept = 2007,
-             linetype = "dashed",
-             color = "darkgrey") +
-  scale_x_continuous(
-    guide = "prism_minor",
-    limits = c(1990, 2020),
-    breaks = seq(1990, 2020, by = 5),
-    minor_breaks = seq(1990, 2020, by = 1)
-  ) +
-  scale_y_continuous(limits = c(0, 140), breaks = seq(0, 140, by = 20)) +
-  scale_color_tableau(palette = "Color Blind") +
-  theme_classic() +
-  theme(
-    panel.grid.major.y = element_line(),
-    axis.ticks.length.x = unit(7, "pt"),
-    prism.ticks.length.x = unit(4, "pt"),
-    legend.position = "none"
-  ) +
-  geom_text(
-    aes(x = 2007, y = 120),
-    nudge_x = 2,
-    nudge_y = 7,
-    label = "2007",
-    color = "#000000"
-  ) +
-  geom_text(aes(x = 1998, y = 120), label = "No highschool\ndegree", color = "#000000") +
-  geom_text(aes(x = 1998, y = 85), label = "College graduate", color = "#000000") +
-  geom_text(aes(x = 1998, y = 60), label = "High school graduate", color = "#000000") +
-  geom_text(aes(x = 1998, y = 40), label = "Some college", color = "#000000") +
-  labs(
-    subtitle = "D: Mother's level of education (ages 20-44)",
-    x = "",
-    y = "",
-    caption = "Source: Birth rates by age group, race and ethnicity, and marital 
-    status are gathered from CDC Vital Statistics Births Reports."
-  )
-
-# Layout plots 2x2
-(fig2a + fig2b) / (fig2e + fig2d)
-```
-
-Plot A shows the trend in birth rates over the period 1980-2020 by five-year age groups. As one would expect, the oldest age group 40-44 has the lowest birth rate. Of note is that the birth rates for older age groups 30-34, 35-39 and 40-44 have been increasing over the period, whereas the younger age groups 15-19, 20-24, 25-29 have been decreasing. The inflection point of increase/decrease is especially noticeable at the year 2007.
-
-Plot B shows the trend in birth rates over the period 1980-2020 for different races and ethnicities. Non-Hispanic black and white groups show a fairly constant trend in birth rates over the period, whereas the Hispanic group shows a significant drop after the Great Recession.
-
-Plot C shows the trend in birth rates over the period 1980-2020 for married vs unmarried mothers. Besides the small increase for unmarried women between 1980 and 1990, the trends do not demonstrate significant change in birth rates. The birth rate is higher for married mothers than unmarried mothers.
-
-Plot D shows the trend in birth rates over the period 1980-2020 for different levels of the mothers' education. The birth rates for highschool graduates, college graduates and mothers with some college education remains in about the same range after 2007. Mothers with no highschool degree have the highest birth rate of the 4 education groups, and the birth rate rises and falls around 2007 before stabilizing to pre-recession levels.
-
-## Cohort effects
-
-To obtain the children ever born, we first calculated the birth rate by dividing the number of births by the population count and then used these values to calculate the cumulative birth rate for each cohort. We then plot the cumulative birth rate against the mother's age, shown in Figure \@ref(fig:cohorttab) which is a replication of Figure 5 of the original paper. The cumulative birth rates for the 3 earlier cohorts are more similar to each other than the 3 later cohorts, with the most recent cohort showing the lowest number of children ever born.
-
-```{r cohorttab, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Children Ever Born by Mother’s Age and Birth Cohort"}
-# Calculate birth rates
-birth_cohort_data <- birth_cohort_data %>%
-  mutate(brate=numbirth/pop*1000,
-         age_20_24_year = case_when(cohort2 == 1 ~ 1992,
-                                    cohort2 == 2 ~ 1997,
-                                    cohort2 == 3 ~ 2002,
-                                    cohort2 == 4 ~ 2007,
-                                    cohort2 == 5 ~ 2012,
-                                    cohort2 == 6 ~ 2017)
-         )
-
-# Calculate cumulative birth rates for each cohort
-birth_cohort_data <- birth_cohort_data %>%
-  group_by(cohort2) %>%
-  mutate(cum_brate = cumsum(brate)/1000, 
-         cohort_years = case_when(cohort2 == 1 ~ "1968-1972",
-                                  cohort2 == 2 ~ "1973-1977",
-                                  cohort2 == 3 ~ "1978-1982",
-                                  cohort2 == 4 ~ "1983-1987",
-                                  cohort2 == 5 ~ "1988-1992",
-                                  cohort2 == 6 ~ "1993-1997")) 
-# Make plot (Figure 5 replication)
-birth_cohort_data %>%
-  ggplot(aes(x = mage,
-             y = cum_brate,
-             color = cohort_years)) +
-  geom_line() +
-  scale_y_continuous(limits=c(0, 2.5), breaks=seq(0, 2.5, by = .5)) +
-  scale_x_continuous(limits=c(15, 44), breaks=seq(15, 44, by = 1)) +
-  scale_color_tableau(palette = "Color Blind") +
-  theme_classic() +
-  theme(panel.grid.major.y = element_line(),
-        legend.background = element_blank(),
-        legend.box.background = element_rect(), 
-        legend.position = c(0.85,0.3)) +
-  labs(
-    x = "Mother's age",
-    y = "Children ever born",
-    color = "Birth cohorts"
-  )
+# Print the plot
+exception_combined_regret_plot
 
 ```
+In the first graph, we can observe two distributions corresponding to the compensation under routine behavior conditions and exception conditions. The compensation amounts are represented on a scale from 0 to 10, which might indicate a range from $0 to $1,000,000. Under the routine behavior condition, the data distribution appears to be more concentrated, suggesting that most participants' compensation amounts were relatively close to each other, and the median seems to be near the middle value of the scale. Under the exception condition, the distribution of compensation data is broader, indicating a greater variance in the participants' assessments of the compensation amount.
+
+The second graph illustrating the distribution of reported regret under routine and exception conditions.In the routine condition, the distribution of regret is narrower and more concentrated around the lower end of the scale, suggesting that participants generally felt less regret for the routine situation. The median regret rating, indicated by the horizontal line inside the violin plot, appears to be below the midpoint of the scale.In the exception condition, the regret distribution is wider at the top, indicating that there is a greater variance in how much regret participants felt, with more reports of higher levels of regret. The median regret rating in this condition is higher than in the routine condition, as seen by its position above the midpoint of the scale.
+
+
+
 
 
 # Discussion
