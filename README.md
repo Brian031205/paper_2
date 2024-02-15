@@ -1,4 +1,4 @@
-# The Impact of Past Behavior Normality onRegret:
+# The Impact of Past Behavior Normality on Regret:
 
 ## A Replication Study∗Reproduction of ’The relationship between the three elements: new experiences,luck, and compensation.
 
