@@ -87,7 +87,7 @@ The last figure titled "Victim Compensation and Regret (with Exception Condition
 ## Overall evaluation in regre depending hitchhiker scenario
 
 
-Figure \@ref(fig:fig1) is a replication of Figure 1 in the original paper, In this section, participants evaluated a classic scenario known as the hitchhiker scenario, to assess the impact of past behavior on the perception of regret following negative outcomes. 92% of the 315 participants believed that Mr. Jones, who almost never gives rides to others, felt a stronger sense of regret. The majority of participants believed that Mr. Jones, who almost never picks up hitchhikers, exhibits behavior that is more common in society (95% out of 326 respondents), whereas Mr. Smith, who frequently gives rides to hitchhikers, is more likely to be criticized by society (91% out of 310 respondents). For the assessment of negative affect, 93% of people believed that Mr. Jones experienced more negative affect compared to Mr. Smith. Overall, these two experiments provided very close replications, similar to the the original study.   
+Figure1 is a replication of Figure 1 in the original paper, In this section, participants evaluated a classic scenario known as the hitchhiker scenario, to assess the impact of past behavior on the perception of regret following negative outcomes. 92% of the 315 participants believed that Mr. Jones, who almost never gives rides to others, felt a stronger sense of regret. The majority of participants believed that Mr. Jones, who almost never picks up hitchhikers, exhibits behavior that is more common in society (95% out of 326 respondents), whereas Mr. Smith, who frequently gives rides to hitchhikers, is more likely to be criticized by society (91% out of 310 respondents). For the assessment of negative affect, 93% of people believed that Mr. Jones experienced more negative affect compared to Mr. Smith. Overall, these two experiments provided very close replications, similar to the the original study.   
 
 
 ```{r fig1, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Rates for Regret, Social norms and Negative affect"}
@@ -122,10 +122,11 @@ fig1 <- ggplot(long_data, aes(x = Category, y = Percentage, fill = Group)) +
   theme(
     legend.position = "bottom", 
     axis.text.x = element_text(angle = 45, hjust = 1), # Rotate x-axis labels if necessary
-    plot.title = element_text(hjust = 0.5) # Center the plot title if you add one
+    plot.title = element_text(hjust = 0.5) 
   )
 fig1
 ```
+
 
 ## Car accident scenario
 
@@ -184,7 +185,7 @@ data$Sc3conditionl1 <- factor(data$Sc3condition1, levels = c(1, 2), labels = c("
 data$compensationaggrecoded1 <- data$compensationagg1 - 1
 data$regretaggrecoded1 <- data$regretagg1 + 1
 
-ggplot(data, aes(x = Sc3conditionl1, y = compensationaggrecoded1)) + 
+fig3 <- ggplot(data, aes(x = Sc3conditionl1, y = compensationaggrecoded1)) + 
   geom_violin(trim = FALSE) + 
   geom_jitter(shape = 16, position = position_jitter(height = 0.1, width = 0.2)) + 
   theme_apa() +
@@ -193,7 +194,7 @@ ggplot(data, aes(x = Sc3conditionl1, y = compensationaggrecoded1)) +
   stat_summary(fun.data = mean_se, geom = "errorbar", position = position_dodge(width = 0.9), width = 0.2) +
   stat_summary(fun.y = mean, geom = "point", shape = 18, size = 3)
 
-ggplot(data, aes(x = Sc3conditionl1, y = regretaggrecoded1)) + 
+fig4 <- ggplot(data, aes(x = Sc3conditionl1, y = regretaggrecoded1)) + 
   geom_violin(trim = FALSE) + 
   geom_jitter(shape = 16, position = position_jitter(height = 0.1, width = 0.2)) + 
   theme_apa() +
@@ -201,6 +202,8 @@ ggplot(data, aes(x = Sc3conditionl1, y = regretaggrecoded1)) +
   stat_summary(fun.data = mean_se, geom = "errorbar", position = position_dodge(width = 0.9), width = 0.2) +
   stat_summary(fun.y = mean, geom = "point", shape = 18, size = 3)
 
+fig3 
+fig4
 ```
 
 
