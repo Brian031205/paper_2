@@ -43,9 +43,9 @@ library(Rcpp)
 
 # Introduction
 
-Regret, a profound and often debilitating emotion, plays a significant role in the fabric of human experience, weaving its way through our decisions, actions, and reflections. This emotional response, characterized by a sense of loss or disappointment over what might have been, emerges from the recognition that different decisions or circumstances could have led to more favorable outcomes. While regret is a universal experience, its intensity and impact can vary widely among individuals and situations (Byre,2016;Roese&·Epstude,2017;Kahneman&Tversky,1982). In this article, we delve into the complex nature of regret, exploring its triggers, consequences, and the psychological underpinnings that shape this emotional landscape. Through a focused examination of three distinct scenarios—Hitchhiker, Car Accident, and Robbery—we aim to dissect the nuanced relationship between regret and human behavior. These scenarios, each with its unique context and set of outcomes, serve as fertile ground for investigating the dynamics of regret in the face of new experiences, luck, and misfortune.
+Regret, a profound and often debilitating emotion, plays a significant role in the fabric of human experience, weaving its way through our decisions, actions, and reflections. This emotional response, characterized by a sense of loss or disappointment over what might have been, emerges from the recognition that different decisions or circumstances could have led to more favorable outcomes. While regret is a universal experience, its intensity and impact can vary widely among individuals and situations (@Byrne2016). In this article, we delve into the complex nature of regret, exploring its triggers, consequences, and the psychological underpinnings that shape this emotional landscape. Through a focused examination of three distinct scenarios—Hitchhiker, Car Accident, and Robbery—we aim to dissect the nuanced relationship between regret and human behavior. These scenarios, each with its unique context and set of outcomes, serve as fertile ground for investigating the dynamics of regret in the face of new experiences, luck, and misfortune.
 
-Influential work by Kahneman and Miller in norm theory has highlighted the connection between abnormal behavior, heightened counterfactual thinking, and intensified feelings of regret. Their discussion of the concept of normality included experimental research illustrating various factors influencing the perception and interpretation of normality (Feldman&Albaracin,2017;Feldman,2018).
+Influential work by Kahneman and Miller in norm theory has highlighted the connection between abnormal behavior, heightened counterfactual thinking, and intensified feelings of regret. (@Miller)Their discussion of the concept of normality included experimental research illustrating various factors influencing the perception and interpretation of normality (@Feldman2018).
 
 However, these analyses do not describe the relationship between the three elements: new experiences, luck, and compensation. This article, therefore, focuses on emphasizing which of these elements more significantly affects how individuals measure the extent of their regret,and then analyze the role of various factors from a psychological perspective.
 
@@ -55,18 +55,18 @@ The three questions below to analyze the three parts and the included experiment
 2. What is the relationship between luck as a measure of regret and the extent of regret
 3: If we could measure regret, what is the relationship betweent compensation and regret??
 
-The first question we address probes the paradoxical phenomenon where attempting new experiences and encountering subsequent disasters often lead to greater regret than sticking to familiar paths. This inquiry sheds light on the psychological mechanisms that amplify regret in the wake of novelty and adversity, suggesting that the allure of potential gains from uncharted territories comes with the shadow of heightened emotional risk (Kahneman & Miller 1986). We explore the intricate dance between the desire for novelty and the aversion to negative outcomes, seeking to understand why our ventures into the unknown are so frequently shadowed by the specter of regret.
+The first question we address probes the paradoxical phenomenon where attempting new experiences and encountering subsequent disasters often lead to greater regret than sticking to familiar paths. This inquiry sheds light on the psychological mechanisms that amplify regret in the wake of novelty and adversity, suggesting that the allure of potential gains from uncharted territories comes with the shadow of heightened emotional risk (@Kahneman). We explore the intricate dance between the desire for novelty and the aversion to negative outcomes, seeking to understand why our ventures into the unknown are so frequently shadowed by the specter of regret.
 
 Secondly, we explore the relationship between luck, or the perceived randomness of outcomes, and the extent of regret experienced by individuals. This aspect of our analysis delves into the role of external factors beyond one's control in modulating the intensity of regret. By examining how individuals attribute outcomes to luck or personal agency, we uncover insights into the cognitive processes that influence the perception and experience of regret.
 
-Lastly, our third question centers on the quantification of human regret, particularly in the context of new activities versus misfortune. Through Experiment 3, we seek to estimate the compensation required to mitigate the psychological trauma associated with regret stemming from engaging in new activities compared to that arising from unfortunate events (Kahneman & Miller 1986). This investigation not only highlights the tangible impact of regret on well-being but also offers a glimpse into the potential for psychological interventions to alleviate the burden of this powerful emotion.
+Lastly, our third question centers on the quantification of human regret, particularly in the context of new activities versus misfortune. Through Experiment 3, we seek to estimate the compensation required to mitigate the psychological trauma associated with regret stemming from engaging in new activities compared to that arising from unfortunate events (@kahneman1986norm). This investigation not only highlights the tangible impact of regret on well-being but also offers a glimpse into the potential for psychological interventions to alleviate the burden of this powerful emotion.
 
-Together, these questions and scenarios weave a comprehensive narrative around the nature of regret, its triggers, and its effects on human behavior and psychological well-being. We can find that the connections among the three elements allow us to better assess the extent of people's regret (Kahneman & Miller 1986).
+Together, these questions and scenarios weave a comprehensive narrative around the nature of regret, its triggers, and its effects on human behavior and psychological well-being. We can find that the connections among the three elements allow us to better assess the extent of people's regret (@kahneman1986norm).
 
 we use R [@citeR] for all data wrangling and analysis and R packages tidyverse [@tidy], ggthemes [@ggthemes], ggprism [@ggprism] and patchwork [@patchwork] to produce the figures, kableExtra [@kableExtra] to produce the tables.
 
 # Data
-The data we used in this paper are obtained from the paper titled “The impact of past behavior normality on regret: replication and extension of three experiments of the exceptionality effect” (Kutscher & Feldman 2022). From the data in the article's tables, for Experiment 1,with Mr. Smith at 7.9% and Mr. Jones at a much higher 92.1%. A similar pattern emerges for injunctive social norms, where Mr. Smith scores 4.7%, contrasting sharply with Mr. Jones at 95.3%. Descriptive social norms show an obvious preference for routine behavior, as reflected in Mr. Smith's 90.6%, while Mr. Jones lags behind at 9.4%. Negative affect follows a parallel trend, with Mr. Smith at 7.3% and Mr. Jones at 92.7%. From Experiment 2 data, 81% of 277 respondents believed that Mr. White, who had recently switched to a new route home and then had an accident, would experience greater regret. Regarding luck, Mr. White (the exception) was seen as less fortunate compared to Mr. Adams (the routine), with 33% (114 participants) considering Mr. Adams as less lucky, while 66% (228 participants) viewed Mr. White as the less fortunate one.
+The data we used in this paper are obtained from the paper titled “The impact of past behavior normality on regret: replication and extension of three experiments of the exceptionality effect” (@Roese). All the data below were collected from the tables and data provided under the original article "The impact of past behaviour normality on regret: replication and extension of three experiments of the exceptionality effect. From the data in the article's tables, for Experiment 1,with Mr. Smith at 7.9% and Mr. Jones at a much higher 92.1%. A similar pattern emerges for injunctive social norms, where Mr. Smith scores 4.7%, contrasting sharply with Mr. Jones at 95.3%. Descriptive social norms show an obvious preference for routine behavior, as reflected in Mr. Smith's 90.6%, while Mr. Jones lags behind at 9.4%. Negative affect follows a parallel trend, with Mr. Smith at 7.3% and Mr. Jones at 92.7%. From Experiment 2 data, 81% of 277 respondents believed that Mr. White, who had recently switched to a new route home and then had an accident, would experience greater regret. Regarding luck, Mr. White (the exception) was seen as less fortunate compared to Mr. Adams (the routine), with 33% (114 participants) considering Mr. Adams as less lucky, while 66% (228 participants) viewed Mr. White as the less fortunate one. In part3, the density of data points explains the majority's view on how much compensation is deemed appropriate in relation to their internal sense of regret. The first graph indicates that most people feel that they should receive a compensation of 500,000, whereas the distribution of data points in the second is more dispersed, with the majority feeling that they should receive more, ranging from 500,000 to 1,000,000. The second graph is similar, only the variable has been changed to regret, with more people feeling that the second individual has greater regret.
 
 
 ## Proportion for perceived regret, injunctive social norms, descriptive social norms, negative affect and luck。
@@ -102,29 +102,39 @@ library(readr)
 library(dplyr)
 
 
-data <- data.frame(
-  Category = c('Regret', 'Social norms (injunctive)', 'Social norms (descriptive)', 'Negative affect'),
-  Smith_Routine = c(7.9, 4.7, 90.6, 7.3),
-  Jones_Exception = c(92.1, 95.3, 9.4, 92.7)
-)
+library(ggplot2)
+library(reshape2)
 
-long_data <- melt(data, id.vars = 'Category', variable.name = 'Group', value.name = 'Percentage')
+# Read the data from Exp1.csv
+data <- read.csv("/cloud/project/inputs/data/Ex1.csv")
+data <- data[-1,]
 
-fig1 <- ggplot(long_data, aes(x = Category, y = Percentage, fill = Group)) +
+# Select columns by index assuming the order is as follows:
+# Condition name, Percentage for Regret, Percentage for Social norm (injunctive),
+# Percentage for Social norms (descriptive), Percentage for Negative affect
+data <- data[, c(1, 3, 5, 7, 9)]
+
+# Assigning the correct names to the columns
+names(data) <- c("Condition", "Regret", "Social_norm_injunctive", "Social_norms_descriptive", "Negative_affect")
+
+# Convert the percentage columns to numeric (as.character is used to handle factors)
+data$Regret <- as.numeric(as.character(data$Regret))
+data$Social_norm_injunctive <- as.numeric(as.character(data$Social_norm_injunctive))
+data$Social_norms_descriptive <- as.numeric(as.character(data$Social_norms_descriptive))
+data$Negative_affect <- as.numeric(as.character(data$Negative_affect))
+
+# Melt the data for use with ggplot2
+data_melted <- melt(data, id.vars = 'Condition')
+
+# Plotting
+ggplot(data_melted, aes(x = variable, y = value, fill = Condition)) + 
   geom_bar(stat = 'identity', position = 'dodge') +
-  scale_fill_grey(start = 0.8, end = 0.2) + # Adjust the grey scale to match the example
+  scale_fill_grey(start = 0.8, end = 0.2) +  # Adjust the colors to match the image
   theme_minimal() +
-  labs(
-    fill = "", 
-    x = "",    
-    y = ""     
-  ) +
-  theme(
-    legend.position = "bottom", 
-    axis.text.x = element_text(angle = 45, hjust = 1), # Rotate x-axis labels if necessary
-    plot.title = element_text(hjust = 0.5) 
-  )
-fig1
+  labs(x = '', y = '') +  # Removing axis labels as in the image
+  theme(legend.title = element_blank(),  # Removing legend title
+        legend.position = 'bottom') +  # Moving legend to bottom
+  scale_y_continuous(labels = scales::percent_format())
 ```
 
 
@@ -138,22 +148,27 @@ Figure 2 is a replication of Figure 2 in the original paper, and shows the Propo
 library(ggplot2)
 library(reshape2)
 
-df <- read.csv("/cloud/project/inputs/data/table2.csv", header = TRUE, stringsAsFactors = FALSE)
+library(ggplot2)
+library(reshape2)
 
-df_clean <- df[, -c(2, 4)]
-names(df_clean) <- c("Category", "Regret", "Luck")
+data <- read.csv("/cloud/project/inputs/data/table2.csv")
 
-df_melted <- melt(df_clean, id.vars = "Category", variable.name = "Outcome", value.name = "Percentage")
+data <- data[-1,]
+data <- data[, c(1, 3, 5)]
 
-fig2 <- ggplot(df_melted, aes(x = Outcome, y = Percentage, fill = Category)) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.7)) +
-  scale_fill_manual(values=c("Routine Adams" = "black", "Exception White" = "grey")) +
-  labs(x = "", y = "Percentage", fill = "") +
+names(data) <- c("Condition", "Regret", "Luck")
+data$Regret <- as.numeric(as.character(data$Regret))
+data$Luck <- as.numeric(as.character(data$Luck))
+data_melted <- melt(data, id.vars = 'Condition')
+
+ggplot(data_melted, aes(x = variable, y = value, fill = Condition)) + 
+  geom_bar(stat = 'identity', position = 'dodge') +
+  scale_fill_grey(start = 0.8, end = 0.2) +  
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "bottom")
-
-fig2
+  labs(x = '', y = '') +  # Removing axis labels as in the image
+  theme(legend.title = element_blank(),  
+        legend.position = 'bottom') +  
+  scale_y_continuous(labels = scales::percent_format()) 
 ```
 
 
@@ -213,25 +228,25 @@ fig4
 
 ## 1. Why does attempting new experiences and encountering disasters often lead to greater regret?
 
-To further explore this concept, we first check for figure1, it's apparent that in the survey, more people believe Mr. Jones, who rarely offers rides, would feel a stronger sense of regret for being robbed due to offering a ride just once. Firstly, the habit of offering rides initially influences one's psychological expectations. For instance, someone who has never offered rides before would tend to believe that their kind act, or an exception, would to some extent help others or receive positive psychological feedback. However, conversely, when their psychological expectations are not met, the sense of psychological disparity comes into play, leading people to feel that acts of kindness might instead invite unnecessary trouble, thereby intensifying their psychological fixation. Positive feedback would make them happier, while negative impacts would bring about more feelings of regret (Kutscher & Feldman 2019).
+To further explore this concept, we first check for figure1, it's apparent that in the survey, more people believe Mr. Jones, who rarely offers rides, would feel a stronger sense of regret for being robbed due to offering a ride just once. Firstly, the habit of offering rides initially influences one's psychological expectations. For instance, someone who has never offered rides before would tend to believe that their kind act, or an exception, would to some extent help others or receive positive psychological feedback. However, conversely, when their psychological expectations are not met, the sense of psychological disparity comes into play, leading people to feel that acts of kindness might instead invite unnecessary trouble, thereby intensifying their psychological fixation. Positive feedback would make them happier, while negative impacts would bring about more feelings of regret (@Kutscher).
 
-From a psychological perspective，counterfactual thinking involves individuals imagining how different actions could have led to different outcomes, particularly after experiencing adverse results. This mental process becomes especially pronounced when attempting new experiences and encountering disasters, as people tend to evaluate their decisions by constructing scenarios that differ from what actually happened (Roese & Olson, 1997). For instance, consider someone who decides to engage in a high-risk investment, hoping for significant returns, but instead faces substantial financial losses. In this context, counterfactual thinking might manifest as thoughts like, "If I hadn't invested in that project, my financial situation would be better now." Such thinking not only deepens the individual's sense of regret but might also lead to doubts about their decision-making abilities. Given that individuals tend to assess the positive outcomes of unchosen alternatives, this mode of thinking amplifies regret over the actual choice made. Therefore, counterfactual thinking reveals how people enhance their feelings of regret by comparing actual outcomes with imagined, potentially better ones, especially when venturing into new experiences that yield unexpected negative consequences (Roese & Olson, 1997).
+From a psychological perspective，counterfactual thinking involves individuals imagining how different actions could have led to different outcomes, particularly after experiencing adverse results. This mental process becomes especially pronounced when attempting new experiences and encountering disasters, as people tend to evaluate their decisions by constructing scenarios that differ from what actually happened (@roese1997affective). For instance, consider someone who decides to engage in a high-risk investment, hoping for significant returns, but instead faces substantial financial losses. In this context, counterfactual thinking might manifest as thoughts like, "If I hadn't invested in that project, my financial situation would be better now." Such thinking not only deepens the individual's sense of regret but might also lead to doubts about their decision-making abilities. Given that individuals tend to assess the positive outcomes of unchosen alternatives, this mode of thinking amplifies regret over the actual choice made. Therefore, counterfactual thinking reveals how people enhance their feelings of regret by comparing actual outcomes with imagined, potentially better ones, especially when venturing into new experiences that yield unexpected negative consequences (@roese1997counterfactual).
 
-we secondly need to verify whether accidents in exceptional behaviors lead to more regret compared to accidents in routine behaviors. Venturing into new experiences and facing setbacks often leads to heightened feelings of regret, a phenomenon deeply rooted in our psychological responses to deviations from routine. When individuals engage in behaviors that stray from their norm—deciding on a whim to take a different route home, trying out an unconventional restaurant, or making an impulsive purchase—any negative outcomes tend to be felt more acutely. This intensified regret is linked to the concept of "exceptionality," where actions that stand out as exceptions to regular patterns are more likely to trigger stronger counterfactual thinking (Briazu et al, 2017). Essentially, when outcomes don't go as planned, our minds more easily imagine alternative scenarios where sticking to the routine could have avoided the undesired result.
+we secondly need to verify whether accidents in exceptional behaviors lead to more regret compared to accidents in routine behaviors. Venturing into new experiences and facing setbacks often leads to heightened feelings of regret, a phenomenon deeply rooted in our psychological responses to deviations from routine. When individuals engage in behaviors that stray from their norm—deciding on a whim to take a different route home, trying out an unconventional restaurant, or making an impulsive purchase—any negative outcomes tend to be felt more acutely. This intensified regret is linked to the concept of "exceptionality," where actions that stand out as exceptions to regular patterns are more likely to trigger stronger counterfactual thinking (@briazu2017undoing). Essentially, when outcomes don't go as planned, our minds more easily imagine alternative scenarios where sticking to the routine could have avoided the undesired result.
 
 
 ## 2. What is the relationship between luck as a measure of regret and the extent of regret
 
-From the article, we can see that among 277 people, 81% believe that a person named White who was involved in a similar accident while driving on a route he only took for a change of scenery would feel greater regret and worse luck. Therefore, the factor of luck often has a direct relationship with the level of regret. When someone encounters a random event, the worse their luck, the stronger their feeling of regret. For example, Mr. Adams had an accident while driving home on his usual route after work. Mr. White had a similar accident while he was driving on a route he only took when he wanted a change of scenery. In such cases, for accidents that happen under normal circumstances, people might think that it was something bound to happen, believing that no matter what, if they were on that road, they would have faced the same situation, and thus, they wouldn't particularly feel unlucky or have much regret (Kutscher & Feldman, 2019). However, people tend to attribute accidents that happen under unusual circumstances to bad luck. Mr. White's temporary choice led to a bad outcome. Since there was no way to weigh the probabilities of different choices at the moment of decision, people are more likely to attribute the event to bad luck, resulting in a stronger sense of regret.
+From the article, we can see that among 277 people, 81% believe that a person named White who was involved in a similar accident while driving on a route he only took for a change of scenery would feel greater regret and worse luck. Therefore, the factor of luck often has a direct relationship with the level of regret. When someone encounters a random event, the worse their luck, the stronger their feeling of regret. For example, Mr. Adams had an accident while driving home on his usual route after work. Mr. White had a similar accident while he was driving on a route he only took when he wanted a change of scenery. In such cases, for accidents that happen under normal circumstances, people might think that it was something bound to happen, believing that no matter what, if they were on that road, they would have faced the same situation, and thus, they wouldn't particularly feel unlucky or have much regret (@Kutscher). However, people tend to attribute accidents that happen under unusual circumstances to bad luck. Mr. White's temporary choice led to a bad outcome. Since there was no way to weigh the probabilities of different choices at the moment of decision, people are more likely to attribute the event to bad luck, resulting in a stronger sense of regret.
 
-The way people understand luck in relation to regret is detailed and subtle. Essentially, luck is about the element of chance in what happens after we make decisions or take actions. When people think that what happens is down to luck, their feelings of regret can change depending on how much control they think they had over the situation. If someone believes a bad outcome was just unlucky, they might not feel as much regret because they see it as something they couldn't avoid. On the other hand, if they see the outcome as the result of their own choices, the regret can be stronger because they think they could have chosen differently to prevent the bad result (Kutscher & Feldman, 2019). This shows that how much regret people feel isn't just about what happens, but also how they interpret these happenings in terms of luck and their own actions. 
+The way people understand luck in relation to regret is detailed and subtle. Essentially, luck is about the element of chance in what happens after we make decisions or take actions. When people think that what happens is down to luck, their feelings of regret can change depending on how much control they think they had over the situation. If someone believes a bad outcome was just unlucky, they might not feel as much regret because they see it as something they couldn't avoid. On the other hand, if they see the outcome as the result of their own choices, the regret can be stronger because they think they could have chosen differently to prevent the bad result (@Kutscher). This shows that how much regret people feel isn't just about what happens, but also how they interpret these happenings in terms of luck and their own actions. 
 
 ## 3: If we could measure regret, what is the relationship betweent compensation and regret?
 
 To comprehensively measure the degree of regret, we combined studies one and two to address this issue. Imagine a person, White, who usually visits a familiar store but encounters a robbery there, losing an arm in the struggle. Another person, Smith, is forced to go to a new store under unusual circumstances and faces the same tragedy. According to the question, people generally believe the amount of money needed to compensate for their losses ranges from $0 to $1,000,000. From the density of points in the article's graph, For White, the chart shows points densely clustered around the midpoint of $500,000, with few believing that compensation should exceed this figure. In contrast, the level of regret for Smith is stronger, resulting in a more dispersed distribution of compensation, with most people believing that compensation should be between ¥500,000 and ¥1,000,000. This suggests that the degree of regret is directly proportional to the compensation expected.
 
 
-The interplay between counterfactual thinking and the consequent feelings of regret significantly influences individuals' expectations for compensation, a dynamic vividly illustrated through the experiences of White and Smith. Counterfactual thinking, the cognitive process of envisioning alternative scenarios that did not occur, can intensify feelings of regret, especially when these imagined outcomes are perceived as more favorable than the actual events. For White, who frequented a familiar store and experienced a robbery resulting in severe injury, the compensation expectations are densely clustered around $500,000, suggesting that the routine nature of his visit might have led to less intense counterfactual thinking and subsequently, a more contained range of expected compensation (Kutscher & Feldman 2019). In contrast, Smith, who ventured into an unfamiliar store under unusual circumstances and encountered the same fate, experiences stronger regret, fueled by more potent counterfactual thoughts such as "If only I had avoided making that unusual choice." This heightened level of regret is reflected in the more dispersed compensation expectations, with most believing that the figure should lie between ¥500,000 and ¥1,000,000. This scenario underlines how the depth and focus of counterfactual thinking can dramatically shape an individual's perception of their loss and their valuation of necessary compensation. It showcases the complex relationship between cognitive processes and emotional responses, demonstrating that individuals' compensation expectations are not only a reflection of their physical losses but also an attempt to mitigate the emotional distress caused by their reflections on what could have been, thus highlighting the profound impact of counterfactual thinking on human behavior and expectations in the aftermath of traumatic events (Kutscher & Feldman, 2019).
+The interplay between counterfactual thinking and the consequent feelings of regret significantly influences individuals' expectations for compensation, a dynamic vividly illustrated through the experiences of White and Smith. Counterfactual thinking, the cognitive process of envisioning alternative scenarios that did not occur, can intensify feelings of regret, especially when these imagined outcomes are perceived as more favorable than the actual events. For White, who frequented a familiar store and experienced a robbery resulting in severe injury, the compensation expectations are densely clustered around $500,000, suggesting that the routine nature of his visit might have led to less intense counterfactual thinking and subsequently, a more contained range of expected compensation (@Kutscher). In contrast, Smith, who ventured into an unfamiliar store under unusual circumstances and encountered the same fate, experiences stronger regret, fueled by more potent counterfactual thoughts such as "If only I had avoided making that unusual choice." This heightened level of regret is reflected in the more dispersed compensation expectations, with most believing that the figure should lie between ¥500,000 and ¥1,000,000. This scenario underlines how the depth and focus of counterfactual thinking can dramatically shape an individual's perception of their loss and their valuation of necessary compensation. It showcases the complex relationship between cognitive processes and emotional responses, demonstrating that individuals' compensation expectations are not only a reflection of their physical losses but also an attempt to mitigate the emotional distress caused by their reflections on what could have been, thus highlighting the profound impact of counterfactual thinking on human behavior and expectations in the aftermath of traumatic events (@Kutscher).
 
 # Conclusion
 This article delves into how people perceive and process regret across various situations, from offering help that leads to negative outcomes, to the role luck plays in our feelings of regret, and finally, how we value compensation after unfortunate events. It highlights how our thoughts about "what could have been," our views on chance, and our expectations for making amends are deeply intertwined with our emotional reactions. The study reveals the complexity of our emotional world and how our minds influence our feelings and choices after difficult situations. By understanding these relationships, we gain insight into the complex nature of human emotions and the significant impact our cognitive and emotional responses have on how we navigate and make sense of challenges in our lives.
